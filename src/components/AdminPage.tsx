@@ -4,6 +4,7 @@ import type { Slot, Request, Candidate, OperationLog } from '../types';
 import { OperationManager } from '../utils/operations';
 import { DatabaseManager } from '../utils/database';
 import { TIME_SLOTS, isSlotOpen } from '../utils/constants';
+import { syncToSupabase } from '../utils/supabase-sync';
 
 interface AdminPageProps {
   db: DatabaseManager;
@@ -70,6 +71,10 @@ export const AdminPage: React.FC<AdminPageProps> = ({ db }) => {
       console.log('확정 결과:', result);
 
       if (result.success) {
+        // Supabase로 동기화
+        const state = db.getState();
+        await syncToSupabase(state.slots, state.requests, state.candidates);
+
         setSuccess(`확정되었습니다! 영향받은 요청: ${result.affectedRequests?.length || 0}건`);
         setSelectedRequest(null);
         setSelectedSlotForConfirm(null);

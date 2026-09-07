@@ -25,6 +25,13 @@ export const AdminApp: React.FC<AdminAppProps> = ({ user }) => {
     }
   };
 
+  const handleResetData = () => {
+    if (window.confirm('모든 데이터를 초기화하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
+      db.reset();
+      window.location.reload();
+    }
+  };
+
   return (
     <div className="container">
       <div className="header">
@@ -37,6 +44,13 @@ export const AdminApp: React.FC<AdminAppProps> = ({ user }) => {
           </div>
         </div>
         <div className="role-selector">
+          <button
+            className="btn btn-secondary"
+            onClick={handleResetData}
+            style={{ padding: '6px 12px', fontSize: '12px', marginLeft: '10px' }}
+          >
+            데이터 초기화
+          </button>
           <button
             className="btn btn-secondary"
             onClick={handleLogout}
