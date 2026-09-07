@@ -37,7 +37,6 @@ export const AdminApp: React.FC<AdminAppProps> = ({ user }) => {
           </div>
         </div>
         <div className="role-selector">
-          <span className="mode-badge supabase">Supabase 모드</span>
           <button
             className="btn btn-secondary"
             onClick={handleLogout}
@@ -49,14 +48,14 @@ export const AdminApp: React.FC<AdminAppProps> = ({ user }) => {
       </div>
 
       <div className="alert alert-warning">
-        <strong>어드민 화면:</strong> 신청 확인, 수동 확정, 실행 기록 (Supabase 데이터베이스)
+        <strong>관리자 화면:</strong> 신청 확인, 수동 확정, 실행 기록
       </div>
 
       <AdminPage db={db} mode="supabase" />
 
       <hr style={{ margin: '40px 0', borderColor: '#ddd' }} />
       <div style={{ fontSize: '12px', color: '#666', textAlign: 'center', paddingBottom: '20px' }}>
-        <p>cal.dudu-works.com v1.0 - 어드민 화면 (Supabase)</p>
+        <p>cal.dudu-works.com v1.0 - 관리자 화면</p>
       </div>
     </div>
   );

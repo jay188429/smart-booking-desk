@@ -35,17 +35,29 @@ export async function signOut() {
 }
 
 export async function getCurrentUser() {
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
+  try {
+    const promise = supabase.auth.getUser();
 
-  if (error) {
-    console.error('사용자 조회 실패:', error.message);
+    // 5초 타임아웃
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('사용자 조회 타임아웃')), 5000)
+    );
+
+    const {
+      data: { user },
+      error,
+    } = await Promise.race([promise, timeoutPromise]) as any;
+
+    if (error) {
+      console.error('사용자 조회 실패:', error.message);
+      return null;
+    }
+
+    return user;
+  } catch (err) {
+    console.error('사용자 조회 중 오류:', err);
     return null;
   }
-
-  return user;
 }
 
 export async function getUserRole() {

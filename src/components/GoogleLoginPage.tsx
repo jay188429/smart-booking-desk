@@ -106,6 +106,8 @@ export const GoogleLoginPage: React.FC<GoogleLoginPageProps> = ({ onLoginSuccess
 
       <p style={{ marginTop: '20px', fontSize: '12px', color: '#666' }}>
         Google 계정으로 로그인하면 예약 시스템에 접속할 수 있습니다.
+        <br />
+        관리자: you18676@gmail.com
       </p>
     </div>
   );

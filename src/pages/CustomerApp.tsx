@@ -38,7 +38,6 @@ export const CustomerApp: React.FC<CustomerAppProps> = ({ user, userRole }) => {
           </div>
         </div>
         <div className="role-selector">
-          <span className="mode-badge supabase">Supabase 모드</span>
           <button
             className="btn btn-secondary"
             onClick={handleLogout}
@@ -50,14 +49,14 @@ export const CustomerApp: React.FC<CustomerAppProps> = ({ user, userRole }) => {
       </div>
 
       <div className="alert alert-info">
-        <strong>고객 화면:</strong> 예약 신청, 상태 확인, 재선택 (Supabase 데이터베이스에 저장됨)
+        <strong>고객 화면:</strong> 예약 신청, 상태 확인, 재선택
       </div>
 
       <CustomerPage db={db} mode="supabase" />
 
       <hr style={{ margin: '40px 0', borderColor: '#ddd' }} />
       <div style={{ fontSize: '12px', color: '#666', textAlign: 'center', paddingBottom: '20px' }}>
-        <p>cal.dudu-works.com v1.0 - 고객 화면 (Supabase)</p>
+        <p>cal.dudu-works.com v1.0 - 고객 화면</p>
         {userRole === 'admin' && (
           <p><a href="/admin">어드민 화면으로 이동</a></p>
         )}
