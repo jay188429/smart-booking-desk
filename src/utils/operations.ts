@@ -139,7 +139,6 @@ export class OperationManager {
 
       // 트랜잭션: 슬롯 마감 + 요청 확정 + 영향받은 다른 요청 갱신
       const affectedRequests: string[] = [];
-      const dbSlots = this.db.getState().slots;
 
       this.db.beginTransaction();
 
@@ -158,34 +157,33 @@ export class OperationManager {
           confirmedAt: new Date().toISOString(),
         });
 
-        // 현재 version에서 모든 후보가 마감된 요청만 needs_reselection으로 갱신
+        // 영향받은 다른 요청들 갱신: 현재 version의 모든 후보가 마감되었는지 확인
         const allRequests = this.db.getAllRequests();
+        const currentSlots = this.db.getState().slots; // 트랜잭션 내에서 현재 상태 조회
+
         allRequests.forEach(otherRequest => {
-          if (otherRequest.id === requestId) return;
-          if (otherRequest.status === 'confirmed') return;
+          if (otherRequest.id === requestId) return; // 방금 확정한 요청 제외
+          if (otherRequest.status === 'confirmed') return; // 이미 확정된 요청 제외
 
           // 현재 version의 후보만 필터
           const otherCurrentCandidates = candidates.filter(
             c => c.requestId === otherRequest.id && c.version === otherRequest.version
           );
 
-          // 마감된 슬롯을 포함하고 있나
-          const hasConfirmedSlot = otherCurrentCandidates.some(c => c.slotId === selectedSlotId);
+          if (otherCurrentCandidates.length === 0) return; // 후보 없음
 
-          if (hasConfirmedSlot) {
-            // 현재 version에서 available 슬롯이 남아있는지 확인
-            const hasAvailable = otherCurrentCandidates.some(c => {
-              const slot = dbSlots[c.slotId];
-              return slot && slot.status === 'available';
+          // 현재 version에서 available 슬롯이 남아있는지 확인
+          const hasAvailable = otherCurrentCandidates.some(c => {
+            const slot = currentSlots[c.slotId];
+            return slot && slot.status === 'available';
+          });
+
+          if (!hasAvailable) {
+            // 모든 현재 후보가 마감됨 → needs_reselection
+            this.db.updateRequest(otherRequest.id, {
+              status: 'needs_reselection',
             });
-
-            if (!hasAvailable) {
-              // 모든 현재 후보가 마감됨 → needs_reselection
-              this.db.updateRequest(otherRequest.id, {
-                status: 'needs_reselection',
-              });
-              affectedRequests.push(otherRequest.id);
-            }
+            affectedRequests.push(otherRequest.id);
           }
         });
 
