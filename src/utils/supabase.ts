@@ -36,17 +36,10 @@ export async function signOut() {
 
 export async function getCurrentUser() {
   try {
-    const promise = supabase.auth.getUser();
-
-    // 5초 타임아웃
-    const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error('사용자 조회 타임아웃')), 5000)
-    );
-
     const {
       data: { user },
       error,
-    } = await Promise.race([promise, timeoutPromise]) as any;
+    } = await supabase.auth.getUser();
 
     if (error) {
       console.error('사용자 조회 실패:', error.message);
@@ -64,7 +57,19 @@ export async function getUserRole() {
   const user = await getCurrentUser();
   if (!user) return null;
 
+  // Supabase에서 user_metadata와 app_metadata 모두 확인
+  const userMetadata = (user as any).user_metadata || {};
   const appMetadata = (user as any).app_metadata || {};
 
-  return appMetadata.role || null;
+  // app_metadata에서 role 확인 (우선순위 높음)
+  if (appMetadata.role) {
+    return appMetadata.role;
+  }
+
+  // user_metadata에서 role 확인
+  if (userMetadata.role) {
+    return userMetadata.role;
+  }
+
+  return null;
 }

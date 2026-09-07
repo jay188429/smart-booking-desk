@@ -14,18 +14,25 @@ const App: React.FC = () => {
   useEffect(() => {
     const checkUser = async () => {
       try {
+        console.log('사용자 확인 시작...');
         const {
           data: { user: currentUser },
         } = await supabase.auth.getUser();
 
+        console.log('현재 사용자:', currentUser?.email);
+
         if (currentUser) {
           setUser(currentUser);
           const role = await getUserRole();
+          console.log('사용자 역할:', role);
           setUserRole(role);
+        } else {
+          console.log('로그인된 사용자 없음');
         }
       } catch (error) {
         console.error('사용자 확인 실패:', error);
       } finally {
+        console.log('로딩 완료');
         setLoading(false);
       }
     };
