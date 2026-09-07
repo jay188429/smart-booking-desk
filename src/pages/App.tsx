@@ -2,16 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { CustomerPage } from '../components/CustomerPage';
 import { AdminPage } from '../components/AdminPage';
 import { DatabaseManager } from '../utils/database';
+import { SupabaseApp } from '../components/SupabaseApp';
 
 type Mode = 'local' | 'supabase';
 type Role = 'customer' | 'admin';
 
-const App: React.FC = () => {
+const LocalApp: React.FC = () => {
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {
     const timer = window.setInterval(() => setNow(new Date()), 1000);
     return () => window.clearInterval(timer);
   }, []);
+
   const [mode] = useState<Mode>('local');
   const [role, setRole] = useState<Role>('customer');
   const [db] = useState(() => new DatabaseManager());
@@ -95,4 +97,14 @@ const App: React.FC = () => {
   );
 };
 
+const App: React.FC = () => {
+  const env = import.meta.env;
+  const configuredMode = env.VITE_APP_MODE || 'local';
+  const [mode, setMode] = useState(configuredMode);
+  if (mode !== 'local' && mode !== 'supabase') return <p role="alert">VITE_APP_MODE는 local 또는 supabase로 설정하세요.</p>;
+  return <>
+    <div className="container"><label htmlFor="connection-mode">접속 모드 </label><select id="connection-mode" value={mode} onChange={event => setMode(event.target.value)}><option value="local">로컬 수업용 미리보기</option><option value="supabase">Supabase 실제 저장</option></select></div>
+    {mode === 'supabase' ? <SupabaseApp config={{ VITE_SUPABASE_URL: env.VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY: env.VITE_SUPABASE_ANON_KEY }} /> : <LocalApp />}
+  </>;
+};
 export default App;

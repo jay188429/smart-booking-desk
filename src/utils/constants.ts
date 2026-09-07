@@ -60,8 +60,9 @@ export function generateAllSlots() {
 }
 
 // 한국 시간 오프셋을 명시하여 OS 시간대와 무관하게 시작 시각을 판정합니다.
-export function isSlotOpen(slot: { date: string; timeLabel: string; status: string } | undefined, now = Date.now()): boolean {
+export function isSlotOpen(slot: { date: string; timeLabel: string; status: string; serverAvailable?: boolean } | undefined, now = Date.now()): boolean {
   if (!slot || slot.status !== 'available') return false;
+  if (typeof slot.serverAvailable === 'boolean') return slot.serverAvailable;
   const time = TIME_SLOTS.find(t => t.label === slot.timeLabel);
   return !!time && new Date(`${slot.date}T${String(time.hour).padStart(2, '0')}:00:00+09:00`).getTime() > now;
 }

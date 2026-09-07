@@ -95,7 +95,8 @@ src/
 └── main.tsx                # React 진입점
 
 sql/
-└── 00_supabase.sql         # Supabase 설치 스크립트 (테이블, 함수, 권한)
+├── 01_install.sql          # 신규 실습 DB 설치
+└── 02_public_slot_access.sql # 공개 가용성 조회 권한 보완
 
 tests/
 └── operations.test.ts      # 신청·확정·재선택 작업 테스트
@@ -182,11 +183,13 @@ tests/
 - 진짜 인증이 아닌 수업용 데모
 - 역할 전환 버튼으로 고객/어드민 전환 가능
 
-### Supabase 모드 (구현 예정)
+### Supabase 모드
 - 실제 데이터베이스 및 인증 적용
 - Supabase Auth로 고객 로그인
 - RPC 호출: `submit_request`, `confirm_request`, `resubmit_request`
-- 환경 변수 설정 필요 (.env.local)
+- VITE_APP_MODE=supabase 및 URL·공개 키 설정 필요 (.env 또는 .env.local)
+- 로그인 계정과 관리자 지정 절차는 START_HERE.md 참조
+- 기존 로컬 예약은 자동 이전하지 않음
 
 ## 공통 시나리오
 
@@ -220,8 +223,8 @@ tests/
 새 실습 프로젝트에서:
 
 ```sql
--- sql/00_supabase.sql 전체 붙여넣기
-SELECT count(*) as slots, min(date) as first_day, max(date) as last_day FROM public.slots;
+-- 새 프로젝트: sql/01_install.sql 다음 sql/02_public_slot_access.sql 실행
+SELECT count(*) as slots, min(date) as first_day, max(date) as last_day FROM public.slot_availability;
 ```
 
 예상 결과: 42개 슬롯, 2026-09-09 ~ 2026-09-22

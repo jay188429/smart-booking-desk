@@ -6,6 +6,7 @@ export interface Slot {
   status: 'available' | 'confirmed'; // confirmed면 마감
   confirmedAt?: string; // ISO 8601
   confirmedBy?: string; // 고객 코드
+  serverAvailable?: boolean; // Supabase 서버 시각으로 판정한 가용성
 }
 
 // 고객의 신청 (접수 한 번당 하나의 요청)

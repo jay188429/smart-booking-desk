@@ -71,3 +71,7 @@ AGENTS.md, CLAUDE.md, PRD.md, START_HERE.md, .env.example, 고정 package-lock.j
 ## 2026-09-07 결함 수정 검수본
 
 기본 업무 요구사항은 유지합니다. 현재 희망은 현재 버전으로 제한하며 이전 후보는 이력으로 분리합니다. 로컬 날짜 생성과 시작 시각 판정은 OS 시간대에 의존하지 않습니다. 화면에서도 매초 가용성을 갱신하고 제출·확정 시 다시 검증합니다. 신규 실습 DB 설치 파일은 sql/01_install.sql입니다. 기존 sql/00_supabase.sql 및 SHA256.json은 원본 비교를 위해 보존하며 이번 수정은 새 배포 기준선 승인을 의미하지 않습니다. 실제 검증 범위는 VERIFICATION.md를 참조합니다.
+
+## Supabase 화면 연결
+
+VITE_APP_MODE=supabase 또는 화면의 명시적 모드 선택으로 실제 인증·저장을 사용합니다. 고객은 Auth UUID로 식별하며 이메일/비밀번호로 로그인합니다. 관리자 화면은 app_metadata.role=admin 계정에 표시하고 DB RPC가 권한을 다시 검증합니다. 공개 슬롯 가용성과 로그인 사용자 신청을 조회하며, 관리자에 한해 전체 신청과 실행 기록을 조회합니다. 재선택 이후 현재 후보와 이력을 분리합니다. 저장은 submit_request, resubmit_request, confirm_request RPC로만 수행합니다. 로컬 데이터는 자동 이전하지 않습니다. 기존 DB와 앱 연결 상태는 실패를 숨기지 않고 표시합니다.

@@ -69,7 +69,7 @@ BEGIN
  RAISE NOTICE 'PASS: Korea start boundary';
 END $$;
 SET LOCAL ROLE anon;
-SELECT count(*) AS public_slot_count FROM public.slot_availability;
+DO $$ BEGIN ASSERT (SELECT count(*) FILTER (WHERE available IS NOT NULL) = 42 FROM public.slot_availability), 'public availability fields accessible'; END $$;
 ROLLBACK;
 
 -- 로컬 회귀 검사와 같은 9/9 09:00 KST 경계. 실제 authenticated 역할로 RPC 호출.

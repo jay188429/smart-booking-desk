@@ -1,14 +1,10 @@
-# cal.dudu-works.com 시작하기
+# cal.dudu 시작하기
 
-예약 기간은 2026-09-09부터 2026-09-22까지입니다. 오전 09:00, 오후 13:00, 저녁 18:00, 총 42슬롯입니다.
+Node.js 22 LTS와 npm을 권장합니다. 예약 기간은 한국 시간 2026-09-09~22, 오전 09:00·오후 13:00·저녁 18:00, 총 42슬롯입니다.
 
-## 1. ZIP을 풀고 VS Code에서 폴더 열기
+## 실행
 
-ZIP을 풀어 package.json과 AGENTS.md가 있는 cal-dudu-starter 폴더를 엽니다. Node.js 22 LTS와 npm을 권장합니다. Terminal 메뉴에서 New Terminal을 엽니다.
-
-## 2. 같은 의존성 설치
-
-Mac 터미널:
+프로젝트 폴더에서 다음 명령을 순서대로 실행합니다. Windows PowerShell에서는 npm 대신 npm.cmd를 사용해도 됩니다.
 
 ```sh
 npm ci
@@ -17,68 +13,77 @@ npm run build
 npm run dev
 ```
 
-Windows PowerShell:
+터미널에 표시된 Local 주소를 엽니다. 기본 포트는 5187입니다. 환경 변수를 수정한 뒤에는 개발 서버를 종료하고 다시 실행합니다.
 
-```powershell
-npm.cmd ci
-npm.cmd test
-npm.cmd run build
-npm.cmd run dev
+## 저장 모드 설정
+
+`.env.example`을 참고하여 `.env` 또는 `.env.local`에 설정합니다. 새 배포본의 기본값은 local이며, 실제 저장은 명시적으로 supabase를 선택합니다.
+
+```dotenv
+VITE_APP_MODE=supabase
+VITE_SUPABASE_URL=https://YOUR_PROJECT.supabase.co
+VITE_SUPABASE_ANON_KEY=YOUR_PUBLIC_ANON_OR_PUBLISHABLE_KEY
 ```
 
-각 명령이 종료된 뒤 다음 명령을 입력합니다. 마지막 명령은 서버를 계속 실행하므로 종료하지 않습니다. 브라우저에서 터미널의 Local 주소를 엽니다. 기본 주소는 http://localhost:5187 입니다. 가상 서비스 이름 cal.dudu-works.com은 실제 배포 주소가 아닙니다.
+Supabase 프로젝트의 Connect/API 설정에서 Project URL과 anon 또는 publishable 공개 키를 확인합니다. service_role, secret key, DB 비밀번호는 브라우저 환경 변수에 넣지 않습니다. 환경 파일과 실제 계정은 Git/ZIP에 포함하지 않습니다.
 
-## 3. 공통 예약 시나리오
+상단 접속 모드 선택에서 **Supabase 실제 저장**을 선택하면 실제 로그인·DB 호출을 사용합니다. 설정 누락이나 연결 오류가 나도 로컬로 자동 전환하지 않습니다. **로컬 수업용 미리보기**는 기존 브라우저 데이터를 그대로 읽는 별도 모드입니다. 로컬 데이터는 Supabase로 자동 이전하지 않으며 초기화하지 않아도 모드를 바꿀 수 있습니다.
 
-1. 고객 C01: 9/9 오전, 9/9 오후를 순서대로 신청합니다.
-2. 고객 C02: 9/9 오전 하나를 신청합니다.
-3. 어드민: C01의 9/9 오전을 확정합니다.
-4. 고객 C02: 재선택 안내를 확인하고 9/10 오전을 신청합니다.
-5. 어드민: C02의 9/10 오전을 확정합니다.
-6. 어드민의 실행 기록에서 결과를 확인합니다.
+## SQL 설치
 
-희망 신청만으로 슬롯이 마감되지 않습니다. 확정된 슬롯에 다른 고객을 확정할 수 없습니다. 다른 희망이 하나라도 남아 있으면 접수 상태를 유지합니다.
+새 실습용 Supabase 프로젝트의 SQL Editor에서 다음 순서로 실행합니다.
 
-## 4. Supabase SQL 설치
+1. `sql/01_install.sql`: 테이블·RPC·권한·42슬롯 설치. 예약과 슬롯을 삭제하지 않으며 이 파일의 재실행은 기존 데이터를 보존합니다.
+2. `sql/02_public_slot_access.sql`: 공개 가용성 조회에 필요한 helper 접근 권한 보완. 예약 데이터나 업무 RPC 권한을 변경하지 않습니다.
 
-새 실습용 Supabase 프로젝트의 SQL Editor에서 New query를 엽니다. `sql/01_install.sql` 전체를 붙여 넣고 Run을 누릅니다. 테이블, 함수, 권한, 42슬롯이 함께 생성됩니다. 이전 버전의 SQL을 추가 실행하지 않습니다.
+이미 01 설치를 마친 프로젝트에서 `permission denied for schema private`가 발생하면 **02만** 적용합니다. `sql/00_supabase.sql`은 이전 배포 원본 보존용이므로 실행하지 않습니다. 00으로 설치된 기존 DB에 01을 덧붙이는 방식은 지원하지 않습니다. 운영 DB 변경은 별도 검수 후 진행합니다.
 
 ```sql
-select count(*) as slots, min(date) as first_day, max(date) as last_day from public.slot_availability;
+select id, date, time_label, status, available
+from public.slot_availability
+order by id;
 ```
 
-예상 결과: 42, 2026-09-09, 2026-09-22.
+예상 결과는 42행입니다. 공개 슬롯 조회에는 고객 식별 정보가 없습니다. `tests/sql/*.sql`은 격리된 검사 DB 전용이며 실제 Supabase SQL Editor에 넣지 않습니다.
 
-RPC(앱에서 호출하는 DB 함수)는 submit_request, confirm_request, resubmit_request입니다. 고객은 Supabase Auth의 사용자 UUID로 식별합니다. 관리자 권한은 서버가 관리하는 app_metadata.role='admin'을 확인합니다. 고객이 수정할 수 있는 user_metadata에 관리자 권한을 넣지 않습니다.
+## 실제 로그인 및 관리자 지정
 
-현재 ZIP의 화면은 한 브라우저의 localStorage를 사용하는 공통 예약 실습 화면입니다. SQL 설치는 Supabase DB를 준비하는 단계입니다. 환경 변수 입력만으로 이 화면이 자동으로 Supabase에 연결되지는 않습니다. 로그인 화면과 DB 호출 연결은 아래 프롬프트로 이어갑니다.
+이 앱은 이메일·비밀번호 로그인을 제공합니다. Supabase Authentication의 Users에서 실습 계정을 준비하고 이메일/비밀번호 로그인 공급자가 활성화되어 있는지 확인합니다. 이메일 확인이 필요한 계정은 확인을 완료해야 합니다. 계정 생성이나 비밀번호 변경은 Supabase에서 처리하며 앱은 로그인만 합니다.
 
-## 5. VS Code의 Haiku에 넣는 연결 프롬프트
+고객은 C01 같은 임의 코드 대신 로그인한 Auth 사용자 UUID로 식별됩니다. 서로 다른 고객 실습에는 서로 다른 계정을 사용하세요.
+
+관리자 지정은 Supabase 관리 권한이 있는 사람이 SQL Editor에서 해당 Auth 사용자 UUID를 확인한 뒤 실행합니다. 실제 UUID나 계정은 프로젝트 파일에 저장하지 않습니다.
+
+```sql
+update auth.users
+set raw_app_meta_data = coalesce(raw_app_meta_data, '{}'::jsonb) || '{"role":"admin"}'::jsonb
+where id = '관리자로-지정할-사용자-UUID'::uuid;
+```
+
+관리자로 지정한 계정은 로그아웃 후 다시 로그인하여 새 토큰을 받아야 합니다. 앱은 `app_metadata.role`을 보고 관리자 화면을 표시하며 확정 권한은 DB에서도 검증합니다. `user_metadata`로 관리자 권한을 지정하지 않습니다.
+
+## 실제 저장 확인
+
+1. 고객 계정 1: 9/9 오전·오후 신청. `public.requests`, `public.candidates`에 저장됩니다.
+2. 고객 계정 2: 9/9 오전 신청. 대기는 슬롯을 점유하지 않으므로 둘 다 접수됩니다.
+3. 관리자: 고객 1의 9/9 오전을 선택하고 **확정 저장**. `public.confirmations`에 저장되고 requests 및 slots도 갱신됩니다.
+4. 고객 2: 새로고침 또는 5초 자동 조회 후 재선택 안내를 확인하고 9/10 오전 재신청.
+5. 마감된 9/9 오전에는 추가 신청·확정이 불가능합니다.
+
+실제 저장 성공 후에만 화면에 **Supabase 접수/확정 저장 완료**가 표시됩니다. 조회·저장 실패는 오류로 표시합니다. 응답 유실 시 같은 입력 재시도에는 sessionStorage에 보존한 작업 ID를 사용합니다. 다른 브라우저/탭에서의 재시도 ID 공유는 지원하지 않습니다. 실습이 예약 시작 시각 이후라면 지난 시간을 선택할 수 없습니다.
+
+## 첫 실행 프롬프트
 
 ```text
-AGENTS.md, PRD.md와 sql/01_install.sql을 읽어라. 고정 슬롯과 판정 함수를 다시 만들지 마라. 기존 로컬 모드는 유지하고 명시적인 Supabase 모드를 연결하라. 고객 로그인은 Supabase Auth를 사용하고 submit_request, confirm_request, resubmit_request를 호출하라. 관리자 여부는 서버의 app_metadata.role로 판정한다. DB 직접 쓰기는 하지 않는다. 인증·조회·저장 오류를 화면에 표시하고 실패 시 로컬 모드로 몰래 전환하지 마라. 위 공통 시나리오를 두 시험 사용자로 실행해 실제 결과를 기록하라.
+AGENTS.md, PRD.md, START_HERE.md를 읽어라. 제공된 42슬롯과 SQL 업무 규칙을 재생성하지 마라. 환경 변수의 비밀값을 출력하지 말고 접속 모드를 확인하라. npm test와 npm run build를 실행하고, 로컬 검사와 실제 Supabase 로그인·저장 검증을 구분해서 보고하라. 운영 DB를 초기화하지 마라.
 ```
 
-.env.example을 참고하여 .env.local에 프로젝트 URL과 공개용 키를 입력합니다. service_role 키와 DB 비밀번호를 VITE_ 변수에 넣지 않습니다. .env.local은 제출하거나 Git에 올리지 않습니다.
+## 파일과 무결성
 
-## 6. 본인 기능 얹기
-
-공통 시나리오가 통과하면 Git에 기본 버전을 저장합니다. 고객 카드에서 한 장면을 선택하여 Journey, Service Blueprint, 기능 선택 이유를 적습니다. UI의 희망 선택 상한 3과 1처럼 설정 하나만 바꾸고 동일 입력의 결과를 비교합니다. 42슬롯과 슬롯당 확정 한 명이라는 DB 규칙은 유지합니다.
-
-## 7. 이번 수정과 검증
-
-신청/확정 시 현재 한국 시각으로 시작 여부를 다시 검사합니다. 재선택 이후 현재 희망만 목록과 확정 대상에 나타나고, 고객 화면의 “이전 선택 이력”에서 과거 버전을 따로 볼 수 있습니다. 재접수는 새 후보 접수 순번으로 관리자 목록 뒤에 배치됩니다.
-
-`sql/00_supabase.sql`은 기존 배포 원본 보존용입니다. 새 실습 DB에는 `sql/01_install.sql`만 실행하세요. 두 파일을 순서대로 실행하는 방식이나 기존 운영 DB 변경용 마이그레이션이 아닙니다. 새 설치 파일을 다시 실행하면 예약을 보존하고 42슬롯을 중복 생성하지 않습니다. 초기화 명령은 포함하지 않습니다.
-
-`tests/scenario.test.ts`는 6단계와 한국 시작 시각 경계를 검사합니다. `tests/sql/scenario.sql`은 격리된 검사 DB에서 같은 업무 결과를 검사하고 고정 시각과 데이터를 롤백합니다. `tests/sql/bootstrap.sql`은 Auth 서비스가 없는 로컬 검사 컨테이너 전용이며 실제 Supabase에는 실행하지 않습니다.
-
-기본 설정은 `src/utils/constants.ts`, 보호 업무 규칙은 `src/utils/decide.ts`, `src/utils/operations.ts`, `src/utils/database.ts`, 고정 데이터는 `src/fixtures/slots.json`, SQL은 `sql/`에서 관리합니다. 다음 명령은 제공 SHA256 기준과의 차이를 보고합니다.
+`src/utils/reservation-api.ts`는 실제 DB 조회와 RPC 저장, 재시도 작업 ID를 관리합니다. `src/components/SupabaseApp.tsx`는 실제 로그인·고객 신청·관리자 확정 화면입니다. `src/utils/decide.ts`는 로컬 후보 가능 여부를 판정합니다. 기본값은 `src/utils/constants.ts`, 고정 데이터는 `src/fixtures/slots.json`, 실제 저장/중복 방지 규칙은 SQL에서 관리합니다.
 
 ```sh
 node scripts/check-manifest.mjs
 ```
 
-이번 수정 전부터 operations.ts와 기존 테스트가 manifest와 달랐습니다. SHA256.json은 변경하지 않았으므로 수정 파일의 불일치는 검수 대기 상태로 보고됩니다. 이 명령은 파일이나 해시를 갱신하지 않습니다. 강사가 원본 차이를 검수하고 새 배포 기준선을 승인하기 전에는 무결성 통과로 읽지 않습니다.
-
-실행 영수증과 미검증 범위는 `VERIFICATION.md`에 기록합니다. 현재 화면은 로컬 전용이며 실제 Supabase 로그인 연결과 배포 완료를 의미하지 않습니다.
+SHA256.json은 기존 배포 기준선이며 수정 파일을 검수 없이 통과시키기 위해 갱신하지 않습니다. 차이는 실패 종료 코드로 보고됩니다. 강사가 배포 원본과 수정본을 검수한 뒤 새 기준선을 별도로 배포합니다. 실제 검증 기록은 `VERIFICATION.md`를 참조하세요. 배포와 도메인 연결은 별도입니다.
