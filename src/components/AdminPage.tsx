@@ -58,6 +58,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ db }) => {
     setSuccess('');
 
     try {
+      console.log('확정 시작:', { selectedRequest, selectedSlotForConfirm, adminId });
       const operationId = `confirm-${selectedRequest}-${selectedSlotForConfirm}-${Date.now()}`;
       const result = await om.confirmRequest(
         selectedRequest,
@@ -65,6 +66,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({ db }) => {
         adminId,
         operationId
       );
+
+      console.log('확정 결과:', result);
 
       if (result.success) {
         setSuccess(`확정되었습니다! 영향받은 요청: ${result.affectedRequests?.length || 0}건`);
@@ -75,6 +78,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ db }) => {
         setError(result.error || '확정 실패');
       }
     } catch (err) {
+      console.error('확정 오류:', err);
       setError(String(err));
     } finally {
       setLoading(false);

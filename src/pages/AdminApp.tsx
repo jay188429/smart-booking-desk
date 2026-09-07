@@ -1,8 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { AdminPage } from '../components/AdminPage';
 import { DatabaseManager } from '../utils/database';
+import { supabase, signOut } from '../utils/supabase';
+import type { User } from '@supabase/supabase-js';
 
-const AdminApp: React.FC = () => {
+interface AdminAppProps {
+  user: User;
+}
+
+export const AdminApp: React.FC<AdminAppProps> = ({ user }) => {
   const [now, setNow] = useState(() => new Date());
   const [db] = useState(() => new DatabaseManager());
 
@@ -11,10 +17,11 @@ const AdminApp: React.FC = () => {
     return () => window.clearInterval(timer);
   }, []);
 
-  const handleResetData = () => {
-    if (window.confirm('모든 데이터를 초기화하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
-      db.reset();
-      window.location.reload();
+  const handleLogout = async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      console.error('로그아웃 실패:', error);
     }
   };
 
@@ -25,33 +32,32 @@ const AdminApp: React.FC = () => {
           <h1>cal.dudu-works.com</h1>
           <div className="reference-time">
             기준 시각: {now.toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })} (한국 현재 시각)
+            <br />
+            <span style={{ fontSize: '12px', color: '#666' }}>로그인: {user.email} (관리자)</span>
           </div>
         </div>
         <div className="role-selector">
-          <span className="mode-badge local">로컬 모드</span>
+          <span className="mode-badge supabase">Supabase 모드</span>
           <button
             className="btn btn-secondary"
-            onClick={handleResetData}
+            onClick={handleLogout}
             style={{ padding: '6px 12px', fontSize: '12px', marginLeft: '10px' }}
           >
-            데이터 초기화
+            로그아웃
           </button>
         </div>
       </div>
 
       <div className="alert alert-warning">
-        <strong>어드민 화면:</strong> 신청 확인, 수동 확정, 실행 기록
+        <strong>어드민 화면:</strong> 신청 확인, 수동 확정, 실행 기록 (Supabase 데이터베이스)
       </div>
 
-      <AdminPage db={db} mode="local" />
+      <AdminPage db={db} mode="supabase" />
 
       <hr style={{ margin: '40px 0', borderColor: '#ddd' }} />
       <div style={{ fontSize: '12px', color: '#666', textAlign: 'center', paddingBottom: '20px' }}>
-        <p>cal.dudu-works.com v1.0 - 어드민 화면</p>
-        <p><a href="/">고객 화면으로 이동</a></p>
+        <p>cal.dudu-works.com v1.0 - 어드민 화면 (Supabase)</p>
       </div>
     </div>
   );
 };
-
-export default AdminApp;
