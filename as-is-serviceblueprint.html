@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Blueprint (As-Is)</title>
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --border-color: #cbd5e1;
+            --text-main: #0f172a;
+            --text-sub: #475569;
+            --pain-color: #ef4444;
+            --pain-bg: #fef2f2;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 24px;
+        }
+
+        .container {
+            max-width: 1500px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            padding: 32px;
+            overflow-x: auto;
+        }
+
+        header {
+            margin-bottom: 24px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 16px;
+        }
+
+        h1 { font-size: 22px; margin: 0 0 6px 0; color: #1e293b; }
+        p.subtitle { margin: 0; color: var(--text-sub); font-size: 13px; }
+
+        .blueprint-grid {
+            display: grid;
+            grid-template-columns: 170px minmax(140px, 1fr) 24px minmax(140px, 1fr) 24px minmax(140px, 1fr) 24px minmax(140px, 1fr) 24px minmax(140px, 1fr) 24px minmax(140px, 1fr);
+            gap: 10px 0;
+            align-items: center;
+            min-width: 1350px;
+        }
+
+        .header-cell {
+            background: #1e293b;
+            color: #ffffff;
+            font-weight: bold;
+            padding: 12px;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 13px;
+        }
+
+        .step-header {
+            background: #334155;
+            color: #ffffff;
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .step-header .title { font-size: 12px; font-weight: bold; }
+
+        .row-label {
+            font-weight: bold;
+            padding: 12px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 12px;
+            margin-right: 8px;
+        }
+
+        .card {
+            padding: 10px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            line-height: 1.4;
+            border: 1px solid var(--border-color);
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 65px;
+            box-sizing: border-box;
+        }
+
+        .arrow-h {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: bold;
+            color: #94a3b8;
+            user-select: none;
+        }
+
+        .arrow-v-row {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: space-around;
+            padding: 6px 0 6px 170px;
+            color: #ef4444;
+            font-weight: bold;
+            font-size: 13px;
+            background: #fff5f5;
+            border-radius: 6px;
+            margin: 4px 0;
+        }
+
+        .physical .row-label { background: #e8f5e9; color: #2e7d32; }
+        .customer .row-label { background: #e3f2fd; color: #1565c0; }
+        .front .row-label { background: #fff8e1; color: #f57f17; }
+        .back .row-label { background: #f3e5f5; color: #6a1b9a; }
+        .support .row-label { background: #efebe9; color: #4e342e; }
+
+        .pain-card {
+            border: 2px dashed var(--pain-color) !important;
+            background: var(--pain-bg) !important;
+            color: #991b1b;
+        }
+
+        .badge-pain {
+            background: var(--pain-color);
+            color: white;
+            font-size: 9px;
+            font-weight: bold;
+            padding: 2px 4px;
+            border-radius: 3px;
+            width: fit-content;
+            margin-bottom: 4px;
+        }
+
+        .line-divider {
+            grid-column: 1 / -1;
+            height: 1px;
+            background: #cbd5e1;
+            margin: 8px 0;
+            position: relative;
+        }
+
+        .line-label {
+            position: absolute;
+            top: -8px;
+            left: 12px;
+            background: #ffffff;
+            padding: 0 6px;
+            font-size: 9px;
+            font-weight: bold;
+            color: #64748b;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>As-Is 서비스 블루프린트</h1>
+        <p class="subtitle">수동 확인 방식의 병목(Backstage)과 유저의 무한 대기(Customer Action) 간 상호작용</p>
+    </header>
+
+    <div class="blueprint-grid">
+        <div class="header-cell">구분 / 단계</div>
+        <div class="step-header"><div class="title">Step 1. 상담 신청</div></div>
+        <div class="arrow-h">➔</div>
+        <div class="step-header"><div class="title">Step 2. 현황 대기</div></div>
+        <div class="arrow-h">➔</div>
+        <div class="step-header"><div class="title">Step 3. 수동 대조</div></div>
+        <div class="arrow-h">➔</div>
+        <div class="step-header"><div class="title">Step 4. 마감 통보</div></div>
+        <div class="arrow-h">➔</div>
+        <div class="step-header"><div class="title">Step 5. 수동 재선택</div></div>
+        <div class="arrow-h">➔</div>
+        <div class="step-header"><div class="title">Step 6. 확정 대기 (Pain)</div></div>
+
+        <!-- 1. Physical Evidence -->
+        <div class="row-label physical">1. Physical Evidence</div>
+        <div class="card">신청 폼 (2개 선택)</div>
+        <div class="arrow-h">➔</div>
+        <div class="card">접수 완료 안내</div>
+        <div class="arrow-h">➔</div>
+        <div class="card">기약없는 "검토중" UI</div>
+        <div class="arrow-h">➔</div>
+        <div class="card">마감 Push 알림</div>
+        <div class="arrow-h">➔</div>
+        <div class="card">재신청 폼</div>
+        <div class="arrow-h">➔</div>
+        <div class="card pain-card"><span class="badge-pain">병목 결과</span>예약 상세 (확정시각 미표시)</div>
+
+        <!-- 2. Customer Actions -->
+        <div class="row-label customer">2. Customer Actions</div>
+        <div class="card">시간대 2개 선택 제출</div>
+        <div class="arrow-h">➔</div>
+        <div class="card">확인 페이지 도달</div>
+        <div class="arrow-h">➔</div>
+        <div class="card pain-card"><span class="badge-pain">피로감</span>확정 몰라 앱 반복 재접속</div>
+        <div class="arrow-h">➔</div>
+        <div class="card">마감 확인 후 당황</div>
+        <div class="arrow-h">➔</div>
+        <div class="card">빈 슬롯 수동 재검토 제출</div>
+        <div class="arrow-h">➔</div>
+        <div class="card pain-card"><span class="badge-pain">1순위 Pain</span>9/8 마감 직전까지 인수인계 불확실</div>
+
+        <div class="line-divider"><span class="line-label">LINE OF INTERACTION (상호작용선)</span></div>
+
+        <!-- 3. Front Stage -->
+        <div class="row-label front">3. Front Stage</div>
+        <div class="card">2개 슬롯 선택 UI</div>
+        <div class="arrow-h">➔</div>
+        <div class="card">신청 내역 표출</div>
+        <div class="arrow-h">➔</div>
+        <div class="card">단순 대기 텍스트 표시</div>
+        <div class="arrow-h">➔</div>
+        <div class="card">마감 팝업 출력</div>
+        <div class="arrow-h">➔</div>
+        <div class="card">재신청 버튼 활성화</div>
+        <div class="arrow-h">➔</div>
+        <div class="card">"재검토 중" 상태 표출</div>
+
+        <div class="line-divider"><span class="line-label">LINE OF VISIBILITY (가시선)</span></div>
+
+        <!-- 수직 인과관계 화살표 -->
+        <div class="arrow-v-row">
+            <span>↓</span><span>↓</span><span>↓ [Backstage 관리자 수동 대조 지연이 Customer Action의 무한 대기 피로감을 유발] ↓</span><span>↓</span><span>↓</span>
+        </div>
+
+        <!-- 4. Back Stage -->
+        <div class="row-label back">4. Back Stage</div>
+        <div class="card">신청 DB 저장</div>
+        <div class="arrow-h">➔</div>
+        <div class="card">검토 대기열 등록</div>
+        <div class="arrow-h">➔</div>
+        <div class="card pain-card"><span class="badge-pain">지연 원인</span>관리자 캘린더 대조</div>
+        <div class="arrow-h">➔</div>
+        <div class="card">마감 상태 변경 처리</div>
+        <div class="arrow-h">➔</div>
+        <div class="card">재신청 DB 저장</div>
+        <div class="arrow-h">➔</div>
+        <div class="card pain-card"><span class="badge-pain">2차 지연</span>수동 2차 승인 대기</div>
+
+        <div class="line-divider"><span class="line-label">LINE OF INTERNAL INTERACTION (내부 상호작용선)</span></div>
+
+        <!-- 5. Support Stage -->
+        <div class="row-label support">5. Support Stage</div>
+        <div class="card">캘린더 DB</div>
+        <div class="arrow-h">➔</div>
+        <div class="card">알림 서버</div>
+        <div class="arrow-h">➔</div>
+        <div class="card pain-card"><span class="badge-pain">시스템 한계</span>수동 대조용 화면</div>
+        <div class="arrow-h">➔</div>
+        <div class="card">Push 발송 시스템</div>
+        <div class="arrow-h">➔</div>
+        <div class="card">캘린더 DB</div>
+        <div class="arrow-h">➔</div>
+        <div class="card">수동 승인 시스템</div>
+    </div>
+</div>
+
+</body>
+</html>

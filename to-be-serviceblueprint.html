@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Blueprint (To-Be AI Agent)</title>
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --border-color: #cbd5e1;
+            --text-main: #0f172a;
+            --text-sub: #475569;
+            --agent-color: #dc2626;
+            --agent-bg: #fff5f5;
+            --success-color: #16a34a;
+            --success-bg: #f0fdf4;
+            --empty-bg: #f1f5f9;
+            --empty-text: #94a3b8;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 24px;
+        }
+
+        .container {
+            max-width: 1500px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            padding: 32px;
+            overflow-x: auto;
+        }
+
+        header {
+            margin-bottom: 24px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 16px;
+        }
+
+        h1 { font-size: 22px; margin: 0 0 6px 0; color: #1e40af; }
+        p.subtitle { margin: 0; color: var(--text-sub); font-size: 13px; }
+
+        .blueprint-grid {
+            display: grid;
+            grid-template-columns: 170px minmax(140px, 1fr) 24px minmax(140px, 1fr) 24px minmax(140px, 1fr) 24px minmax(140px, 1fr) 24px minmax(140px, 1fr) 24px minmax(140px, 1fr);
+            gap: 10px 0;
+            align-items: center;
+            min-width: 1350px;
+        }
+
+        .header-cell {
+            background: #0f172a;
+            color: #ffffff;
+            font-weight: bold;
+            padding: 12px;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 13px;
+        }
+
+        .step-header {
+            background: #1e293b;
+            color: #ffffff;
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .step-header .title { font-size: 12px; font-weight: bold; }
+        .step-header .tag { font-size: 10px; color: #93c5fd; }
+
+        .row-label {
+            font-weight: bold;
+            padding: 12px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 12px;
+            margin-right: 8px;
+        }
+
+        .card {
+            padding: 10px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            line-height: 1.4;
+            border: 1px solid var(--border-color);
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 65px;
+            box-sizing: border-box;
+        }
+
+        /* 빈칸(소멸된 단계) 스타일 */
+        .empty-card {
+            background: var(--empty-bg) !important;
+            border: 1px dashed #cbd5e1 !important;
+            color: var(--empty-text) !important;
+            text-align: center;
+            font-style: italic;
+        }
+
+        /* AI Agent 개입 카드 강조 전용 스타일 (붉은 점선 박스) */
+        .agent-highlight {
+            border: 2px dashed var(--agent-color) !important;
+            background: var(--agent-bg) !important;
+        }
+
+        .badge-agent {
+            background: var(--agent-color);
+            color: white;
+            font-size: 9px;
+            font-weight: bold;
+            padding: 2px 5px;
+            border-radius: 3px;
+            width: fit-content;
+            margin-bottom: 4px;
+        }
+
+        .badge-success {
+            background: var(--success-color);
+            color: white;
+            font-size: 9px;
+            font-weight: bold;
+            padding: 2px 5px;
+            border-radius: 3px;
+            width: fit-content;
+            margin-bottom: 4px;
+        }
+
+        .arrow-h {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: bold;
+            color: #2563eb;
+            user-select: none;
+        }
+
+        .arrow-v-row {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: space-around;
+            padding: 6px 0 6px 170px;
+            color: #2563eb;
+            font-weight: bold;
+            font-size: 12px;
+            background: #eff6ff;
+            border-radius: 6px;
+            margin: 4px 0;
+        }
+
+        .physical .row-label { background: #e8f5e9; color: #2e7d32; }
+        .customer .row-label { background: #e3f2fd; color: #1565c0; }
+        .front .row-label { background: #fff8e1; color: #f57f17; }
+        .back .row-label { background: #f3e5f5; color: #6a1b9a; }
+        .support .row-label { background: #efebe9; color: #4e342e; }
+
+        .line-divider {
+            grid-column: 1 / -1;
+            height: 1px;
+            background: #cbd5e1;
+            margin: 8px 0;
+            position: relative;
+        }
+
+        .line-label {
+            position: absolute;
+            top: -8px;
+            left: 12px;
+            background: #ffffff;
+            padding: 0 6px;
+            font-size: 9px;
+            font-weight: bold;
+            color: #2563eb;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>To-Be 서비스 블루프린트</h1>
+        <p class="subtitle">AI Agent 도입으로 불필요해진 단계는 빈칸(Blank) 처리 / 붉은 점선 박스는 Agent 개입 영역</p>
+    </header>
+
+    <div class="blueprint-grid">
+        <!-- 헤더 영역 (As-Is와 100% 동일한 Step 틀) -->
+        <div class="header-cell">구분 / 단계</div>
+        <div class="step-header"><div class="title">Step 1. 상담 신청</div></div>
+        <div class="arrow-h">➔</div>
+        <div class="step-header"><div class="title">Step 2. 현황 대기</div></div>
+        <div class="arrow-h">➔</div>
+        <div class="step-header"><div class="title">Step 3. 수동 대조</div></div>
+        <div class="arrow-h">➔</div>
+        <div class="step-header"><div class="title">Step 4. 마감 통보</div></div>
+        <div class="arrow-h">➔</div>
+        <div class="step-header"><div class="title">Step 5. 수동 재선택</div></div>
+        <div class="arrow-h">➔</div>
+        <div class="step-header"><div class="title">Step 6. 확정 (해소)</div></div>
+
+        <!-- 1. Physical Evidence -->
+        <div class="row-label physical">1. Physical Evidence</div>
+        <div class="card">3개 우선순위 선택 UI</div>
+        <div class="arrow-h">➔</div>
+        <div class="card agent-highlight">
+            <span class="badge-agent">AI Agent 모듈</span>
+            SLA 타이머 팝업
+        </div>
+        <div class="arrow-h">➔</div>
+        <div class="card empty-card">[ - ] (자동 매칭 중)</div>
+        <div class="arrow-h">➔</div>
+        <div class="card empty-card">[ - ] (마감 없음)</div>
+        <div class="arrow-h">➔</div>
+        <div class="card empty-card">[ - ] (재선택 불필요)</div>
+        <div class="arrow-h">➔</div>
+        <div class="card" style="background: #f0fdf4;">실시간 Push 확정 알림 및 티켓</div>
+
+        <!-- 2. Customer Actions -->
+        <div class="row-label customer">2. Customer Actions</div>
+        <div class="card">후보 3개 한 번에 제출</div>
+        <div class="arrow-h">➔</div>
+        <div class="card" style="background: #f8fafc;">SLA 보장 대기</div>
+        <div class="arrow-h">➔</div>
+        <div class="card empty-card">[ - ] (유저 개입 없음)</div>
+        <div class="arrow-h">➔</div>
+        <div class="card empty-card">[ - ] (당황/재확인 없음)</div>
+        <div class="arrow-h">➔</div>
+        <div class="card empty-card">[ - ] (재선택 없음)</div>
+        <div class="arrow-h">➔</div>
+        <div class="card" style="background: #f0fdf4;"><span class="badge-success">불안 해소</span>즉시 확정 확인 후 안심</div>
+
+        <div class="line-divider"><span class="line-label">LINE OF INTERACTION (상호작용선)</span></div>
+
+        <!-- 3. Front Stage -->
+        <div class="row-label front">3. Front Stage</div>
+        <div class="card">우선순위 Form 제공</div>
+        <div class="arrow-h">➔</div>
+        <div class="card agent-highlight">
+            <span class="badge-agent">AI Agent 모듈</span>
+            SLA 타이머 표출
+        </div>
+        <div class="arrow-h">➔</div>
+        <div class="card empty-card">[ - ] (수동 대기 없음)</div>
+        <div class="arrow-h">➔</div>
+        <div class="card empty-card">[ - ] (마감 팝업 없음)</div>
+        <div class="arrow-h">➔</div>
+        <div class="card empty-card">[ - ] (재신청 Form 없음)</div>
+        <div class="arrow-h">➔</div>
+        <div class="card">확정 일시 및 정보 표출</div>
+
+        <div class="line-divider"><span class="line-label">LINE OF VISIBILITY (가시선)</span></div>
+
+        <!-- 수직 상호작용 화살표 -->
+        <div class="arrow-v-row">
+            <span>↑↓ [Front Stage ↔ Back Stage Agent 간 실시간 상호작용 및 자동 매칭으로 중간 단계 소멸] ↑↓</span>
+        </div>
+
+        <!-- 4. Back Stage -->
+        <div class="row-label back">4. Back Stage</div>
+        <div class="card">신청 DB 저장</div>
+        <div class="arrow-h">➔</div>
+        <div class="card agent-highlight">
+            <span class="badge-agent">AI Agent</span>
+            실시간 캘린더 대조
+        </div>
+        <div class="arrow-h">➔</div>
+        <div class="card agent-highlight">
+            <span class="badge-agent">AI Agent</span>
+            자동 즉시 승인
+        </div>
+        <div class="arrow-h">➔</div>
+        <div class="card empty-card">[ - ] (마감 처리 없음)</div>
+        <div class="arrow-h">➔</div>
+        <div class="card empty-card">[ - ] (재신청 DB 없음)</div>
+        <div class="arrow-h">➔</div>
+        <div class="card">`CONFIRMED` DB 반영</div>
+
+        <div class="line-divider"><span class="line-label">LINE OF INTERNAL INTERACTION (내부 상호작용선)</span></div>
+
+        <!-- 5. Support Stage -->
+        <div class="row-label support">5. Support Stage</div>
+        <div class="card">캘린더 DB API</div>
+        <div class="arrow-h">➔</div>
+        <div class="card agent-highlight">
+            <span class="badge-agent">AI Engine</span>
+            SLA 모니터링
+        </div>
+        <div class="arrow-h">➔</div>
+        <div class="card agent-highlight">
+            <span class="badge-agent">AI Engine</span>
+            자동 매칭 엔진
+        </div>
+        <div class="arrow-h">➔</div>
+        <div class="card empty-card">[ - ] (수동 시스템 제거)</div>
+        <div class="arrow-h">➔</div>
+        <div class="card empty-card">[ - ] (재신청 처리 제거)</div>
+        <div class="arrow-h">➔</div>
+        <div class="card">Push 발송 서버</div>
+    </div>
+</div>
+
+</body>
+</html>

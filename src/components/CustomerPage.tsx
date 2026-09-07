@@ -5,6 +5,8 @@ import { OperationManager } from '../utils/operations';
 import { DatabaseManager } from '../utils/database';
 import { decideRequestStatus } from '../utils/decide';
 import { TIME_SLOTS, isSlotOpen } from '../utils/constants';
+import { getSlaState, getSlaText } from '../utils/sla';
+import { recommendAlternativeSlots } from '../utils/recommend';
 
 interface CustomerPageProps {
   db: DatabaseManager;
@@ -22,6 +24,7 @@ export const CustomerPage: React.FC<CustomerPageProps> = ({ db }) => {
   const [error, setError] = useState<string>('');
   const [success, setSuccess] = useState<string>('');
   const [loading, setLoading] = useState(false);
+  const [now, setNow] = useState(() => Date.now());
 
   const om = new OperationManager(db);
 
@@ -42,6 +45,11 @@ export const CustomerPage: React.FC<CustomerPageProps> = ({ db }) => {
     }, 1000);
     return () => window.clearInterval(timer);
   }, [customerId, stage, db]);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   const loadData = () => {
     const state = db.getState();
@@ -108,8 +116,8 @@ export const CustomerPage: React.FC<CustomerPageProps> = ({ db }) => {
     }
   };
 
-  const handleReselect = async () => {
-    if (selectedSlots.length === 0) {
+  const handleReselect = async (slotIds = selectedSlots) => {
+    if (slotIds.length === 0) {
       setError('최소 1개 이상의 슬롯을 선택하세요');
       return;
     }
@@ -124,7 +132,7 @@ export const CustomerPage: React.FC<CustomerPageProps> = ({ db }) => {
       const result = await om.resubmitRequest(
         customerId,
         latest.request.id,
-        selectedSlots,
+        slotIds,
         operationId
       );
 
@@ -165,6 +173,11 @@ export const CustomerPage: React.FC<CustomerPageProps> = ({ db }) => {
     }
     return true;
   };
+
+  const reselectionItem = customerRequests[customerRequests.length - 1];
+  const recommendedSlots = reselectionItem
+    ? recommendAlternativeSlots(slots, reselectionItem.candidates.map(candidate => candidate.slotId))
+    : [];
 
   return (
     <div className="customer-page">
@@ -293,6 +306,9 @@ export const CustomerPage: React.FC<CustomerPageProps> = ({ db }) => {
                   {item.request.status === 'needs_reselection' && (
                     <span className="alert alert-warning">재선택 필요</span>
                   )}
+                  <div className={getSlaState(item.request.createdAt, item.request.status, now) === 'expired' ? 'sla-expired' : ''}>
+                    {getSlaText(item.request.createdAt, item.request.status, now)}
+                  </div>
                 </div>
               </div>
 
@@ -355,6 +371,19 @@ export const CustomerPage: React.FC<CustomerPageProps> = ({ db }) => {
           <p style={{ color: '#666', fontSize: '14px' }}>
             이전 신청의 슬롯이 모두 마감되었습니다. 다시 선택해주세요.
           </p>
+          {recommendedSlots.length > 0 && (
+            <div className="recommendation-panel">
+              <h4>추천 대안 슬롯</h4>
+              <p>가능한 가장 이른 시간부터 추천합니다. 버튼을 누르면 바로 재선택됩니다.</p>
+              <div className="recommendation-list">
+                {recommendedSlots.map(slotId => (
+                  <button key={slotId} className="btn btn-secondary" onClick={() => void handleReselect([slotId])} disabled={loading}>
+                    {slotId}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
           <SlotTable
             slots={slots}
             selectedSlots={selectedSlots}
@@ -389,7 +418,7 @@ export const CustomerPage: React.FC<CustomerPageProps> = ({ db }) => {
           <div style={{ display: 'flex', gap: '10px' }}>
             <button
               className="btn btn-primary"
-              onClick={handleReselect}
+              onClick={() => void handleReselect()}
               disabled={selectedSlots.length === 0 || loading}
             >
               {loading ? '처리 중...' : '재선택 제출'}

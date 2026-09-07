@@ -13,7 +13,7 @@ interface SupabaseAppProps {
   };
 }
 
-export const SupabaseApp: React.FC<SupabaseAppProps> = ({ config }) => {
+export const SupabaseApp: React.FC<SupabaseAppProps> = () => {
   const [user, setUser] = useState<User | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -43,7 +43,7 @@ export const SupabaseApp: React.FC<SupabaseAppProps> = ({ config }) => {
     // Auth 상태 변경 구독
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session?.user) {
         setUser(session.user);
         const role = await getUserRole();

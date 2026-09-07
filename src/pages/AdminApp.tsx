@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { AdminPage } from '../components/AdminPage';
-import { DatabaseManager } from '../utils/database';
+import { SupabaseAdminPage } from '../components/SupabaseAdminPage';
 import { supabase, signOut } from '../utils/supabase';
 import type { User } from '@supabase/supabase-js';
 
 interface AdminAppProps {
   user: User;
+  onLogout: () => void;
 }
 
-export const AdminApp: React.FC<AdminAppProps> = ({ user }) => {
+export const AdminApp: React.FC<AdminAppProps> = ({ user, onLogout }) => {
   const [now, setNow] = useState(() => new Date());
-  const [db] = useState(() => new DatabaseManager());
 
   useEffect(() => {
     const timer = window.setInterval(() => setNow(new Date()), 1000);
@@ -20,15 +19,9 @@ export const AdminApp: React.FC<AdminAppProps> = ({ user }) => {
   const handleLogout = async () => {
     try {
       await signOut();
+      onLogout();
     } catch (error) {
       console.error('로그아웃 실패:', error);
-    }
-  };
-
-  const handleResetData = () => {
-    if (window.confirm('모든 데이터를 초기화하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
-      db.reset();
-      window.location.reload();
     }
   };
 
@@ -46,13 +39,6 @@ export const AdminApp: React.FC<AdminAppProps> = ({ user }) => {
         <div className="role-selector">
           <button
             className="btn btn-secondary"
-            onClick={handleResetData}
-            style={{ padding: '6px 12px', fontSize: '12px', marginLeft: '10px' }}
-          >
-            데이터 초기화
-          </button>
-          <button
-            className="btn btn-secondary"
             onClick={handleLogout}
             style={{ padding: '6px 12px', fontSize: '12px', marginLeft: '10px' }}
           >
@@ -65,11 +51,12 @@ export const AdminApp: React.FC<AdminAppProps> = ({ user }) => {
         <strong>관리자 화면:</strong> 신청 확인, 수동 확정, 실행 기록
       </div>
 
-      <AdminPage db={db} mode="supabase" />
+      <SupabaseAdminPage client={supabase} user={user} />
 
       <hr style={{ margin: '40px 0', borderColor: '#ddd' }} />
       <div style={{ fontSize: '12px', color: '#666', textAlign: 'center', paddingBottom: '20px' }}>
         <p>cal.dudu-works.com v1.0 - 관리자 화면</p>
+        <p><a href="/customer">고객 화면으로 이동</a></p>
       </div>
     </div>
   );

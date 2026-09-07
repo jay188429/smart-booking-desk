@@ -461,7 +461,56 @@ END;
 $$;
 
 -- ====================================================
--- 9. 권한
+-- 9. 관리자 조회·초기화 RPC
+-- ====================================================
+
+CREATE OR REPLACE FUNCTION private.admin_request_overview()
+RETURNS TABLE (
+  id UUID,
+  customer_id TEXT,
+  customer_email TEXT,
+  version INTEGER,
+  created_at TIMESTAMPTZ,
+  status TEXT,
+  confirmed_slot_id TEXT
+)
+SECURITY DEFINER
+SET search_path = ''
+LANGUAGE sql
+AS $$
+  SELECT r.id, r.customer_id, u.email::text, r.version, r.created_at, r.status, r.confirmed_slot_id
+  FROM public.requests r
+  LEFT JOIN auth.users u ON u.id::text = r.customer_id
+  WHERE (auth.jwt()::jsonb->'app_metadata'->>'role')::text = 'admin'
+  ORDER BY r.created_at ASC
+$$;
+
+CREATE OR REPLACE FUNCTION private.admin_reset_reservations()
+RETURNS JSONB
+SECURITY DEFINER
+SET search_path = ''
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  IF (auth.jwt()::jsonb->'app_metadata'->>'role')::text != 'admin' THEN
+    RETURN jsonb_build_object('success', false, 'error', 'Not authorized');
+  END IF;
+
+  DELETE FROM public.confirmations;
+  DELETE FROM public.candidates;
+  DELETE FROM public.operation_logs;
+  DELETE FROM public.requests;
+  UPDATE public.slots
+  SET status = 'available', confirmed_by = NULL, confirmed_at = NULL, updated_at = NOW();
+
+  RETURN jsonb_build_object('success', true);
+EXCEPTION WHEN OTHERS THEN
+  RETURN jsonb_build_object('success', false, 'error', SQLERRM);
+END;
+$$;
+
+-- ====================================================
+-- 10. 권한
 -- ====================================================
 
 -- ====================================================
@@ -534,6 +583,22 @@ REVOKE ALL ON FUNCTION private.resubmit_request(text, uuid, text[], text) FROM P
 GRANT EXECUTE ON FUNCTION private.resubmit_request(text, uuid, text[], text) TO authenticated;
 REVOKE ALL ON FUNCTION public.resubmit_request(text, uuid, text[], text) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.resubmit_request(text, uuid, text[], text) TO authenticated;
+
+CREATE OR REPLACE FUNCTION public.admin_request_overview()
+RETURNS TABLE (id UUID, customer_id TEXT, customer_email TEXT, version INTEGER, created_at TIMESTAMPTZ, status TEXT, confirmed_slot_id TEXT)
+LANGUAGE sql SECURITY INVOKER SET search_path = '' AS $$ SELECT * FROM private.admin_request_overview() $$;
+REVOKE ALL ON FUNCTION private.admin_request_overview() FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION private.admin_request_overview() TO authenticated;
+REVOKE ALL ON FUNCTION public.admin_request_overview() FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.admin_request_overview() TO authenticated;
+
+CREATE OR REPLACE FUNCTION public.admin_reset_reservations()
+RETURNS JSONB
+LANGUAGE sql SECURITY INVOKER SET search_path = '' AS $$ SELECT private.admin_reset_reservations() $$;
+REVOKE ALL ON FUNCTION private.admin_reset_reservations() FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION private.admin_reset_reservations() TO authenticated;
+REVOKE ALL ON FUNCTION public.admin_reset_reservations() FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.admin_reset_reservations() TO authenticated;
 
 -- 공개 조회는 고객 식별 정보를 제외하고, 업무 테이블 쓰기는 RPC로만 허용합니다.
 REVOKE ALL ON public.slots, public.requests, public.candidates, public.confirmations, public.operation_logs FROM PUBLIC, anon, authenticated;

@@ -1,6 +1,6 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type { Slot } from '../types';
-export interface Booking { id: string; customer_id: string; version: number; created_at: string; status: 'received' | 'needs_reselection' | 'confirmed'; confirmed_slot_id: string | null }
+export interface Booking { id: string; customer_id: string; customer_email?: string | null; version: number; created_at: string; status: 'received' | 'needs_reselection' | 'confirmed'; confirmed_slot_id: string | null }
 export interface Wish { id: string; request_id: string; slot_id: string; priority: number; version: number; queue_seq: number }
 export interface Audit { id: string; operation_id: string; action: string; request_id: string | null; status: string; error_message: string | null }
 export interface Snapshot { slots: Record<string, Slot>; requests: Booking[]; candidates: Wish[]; logs: Audit[] }
@@ -25,9 +25,26 @@ export async function readSnapshot(client: SupabaseClient, userId: string, admin
   queryError('슬롯 조회 실패', slotResult.error);
   if (!slotResult.data || slotResult.data.length !== 42 || slotResult.data.some(s => typeof s.available !== 'boolean')) throw new Error('슬롯 설치 결과가 올바르지 않습니다. 42슬롯과 가용성 조회를 확인하세요.');
   const slots = Object.fromEntries(slotResult.data.map(s => [s.id, { id: s.id, date: s.date, timeLabel: s.time_label, status: s.status, serverAvailable: s.available }])) as Record<string, Slot>;
-  let query = client.from('requests').select('id,customer_id,version,created_at,status,confirmed_slot_id');
-  if (!admin) query = query.eq('customer_id', userId);
-  const requestResult = await query.returns<Booking[]>();
+  let requestResult;
+  if (admin) {
+    const overviewResult = await client.rpc('admin_request_overview').returns<Booking[]>();
+    if (!overviewResult.error) {
+      requestResult = overviewResult;
+    } else if (/admin_request_overview|schema cache|not find/i.test(overviewResult.error.message)) {
+      requestResult = await client
+        .from('requests')
+        .select('id,customer_id,version,created_at,status,confirmed_slot_id')
+        .returns<Booking[]>();
+    } else {
+      requestResult = overviewResult;
+    }
+  } else {
+    requestResult = await client
+      .from('requests')
+      .select('id,customer_id,version,created_at,status,confirmed_slot_id')
+      .eq('customer_id', userId)
+      .returns<Booking[]>();
+  }
   queryError('신청 조회 실패', requestResult.error);
   const requests = requestResult.data || [];
   let candidates: Wish[] = [];

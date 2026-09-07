@@ -5,13 +5,15 @@ import { OperationManager } from '../utils/operations';
 import { DatabaseManager } from '../utils/database';
 import { TIME_SLOTS, isSlotOpen } from '../utils/constants';
 import { syncToSupabase } from '../utils/supabase-sync';
+import { getSlaText } from '../utils/sla';
+import { chooseAutoMatch } from '../utils/auto-match';
 
 interface AdminPageProps {
   db: DatabaseManager;
   mode: 'local' | 'supabase';
 }
 
-export const AdminPage: React.FC<AdminPageProps> = ({ db }) => {
+export const AdminPage: React.FC<AdminPageProps> = ({ db, mode }) => {
   const [adminId] = useState<string>('ADMIN001');
   const [slots, setSlots] = useState<Record<string, Slot>>({});
   const [requests, setRequests] = useState<
@@ -23,6 +25,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({ db }) => {
   const [error, setError] = useState<string>('');
   const [success, setSuccess] = useState<string>('');
   const [loading, setLoading] = useState(false);
+  const [now, setNow] = useState(() => Date.now());
+  const [autoMatching, setAutoMatching] = useState(false);
 
   const om = new OperationManager(db);
 
@@ -38,6 +42,11 @@ export const AdminPage: React.FC<AdminPageProps> = ({ db }) => {
     }, 1000);
     return () => window.clearInterval(timer);
   }, [db]);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   const loadData = () => {
     const state = db.getState();
@@ -71,9 +80,10 @@ export const AdminPage: React.FC<AdminPageProps> = ({ db }) => {
       console.log('확정 결과:', result);
 
       if (result.success) {
-        // Supabase로 동기화
-        const state = db.getState();
-        await syncToSupabase(state.slots, state.requests, state.candidates);
+        if (mode === 'supabase') {
+          const state = db.getState();
+          await syncToSupabase(state.slots, state.requests, state.candidates);
+        }
 
         setSuccess(`확정되었습니다! 영향받은 요청: ${result.affectedRequests?.length || 0}건`);
         setSelectedRequest(null);
@@ -90,6 +100,39 @@ export const AdminPage: React.FC<AdminPageProps> = ({ db }) => {
     }
   };
 
+  const handleAutoMatch = async () => {
+    setAutoMatching(true);
+    setError('');
+    setSuccess('');
+    let matched = 0;
+    try {
+      for (let attempt = 0; attempt < 100; attempt += 1) {
+        const currentRequests = om.getAdminRequests();
+        const match = chooseAutoMatch(
+          currentRequests.map(item => ({ id: item.request.id, status: item.request.status })),
+          currentRequests.flatMap(item => item.candidates.map(candidate => ({
+            requestId: candidate.requestId,
+            slotId: candidate.slotId,
+            priority: candidate.priority,
+            queueSeq: candidate.queueSeq,
+            version: candidate.version,
+          }))),
+          slotId => isSlotOpen(db.getState().slots[slotId])
+        );
+        if (!match) break;
+        const result = await om.confirmRequest(match.requestId, match.slotId, adminId, `auto-${match.requestId}-${match.slotId}-${Date.now()}`);
+        if (!result.success) break;
+        matched += 1;
+      }
+      setSuccess(matched ? `규칙 기반 자동 매칭 ${matched}건 완료` : '자동 매칭 가능한 신청이 없습니다.');
+      loadData();
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : String(reason));
+    } finally {
+      setAutoMatching(false);
+    }
+  };
+
   const currentRequest = selectedRequest ? requests.find(r => r.request.id === selectedRequest) : null;
 
   return (
@@ -98,6 +141,9 @@ export const AdminPage: React.FC<AdminPageProps> = ({ db }) => {
 
       {error && <div className="alert alert-error">{error}</div>}
       {success && <div className="alert alert-success">{success}</div>}
+      <button className="btn btn-primary" onClick={() => void handleAutoMatch()} disabled={autoMatching || loading}>
+        {autoMatching ? '자동 매칭 중...' : '규칙 기반 자동 매칭'}
+      </button>
 
       <div className="grid">
         {/* 요청 목록 */}
@@ -136,6 +182,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({ db }) => {
                           ? '재선택필요'
                           : '접수됨'}
                     </span>
+                    <br />
+                    <span className="sla-text">{getSlaText(item.request.createdAt, item.request.status, now)}</span>
                   </div>
                 </li>
               ))}
@@ -166,6 +214,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ db }) => {
                   }
                   disabled
                 />
+                <small className="sla-text">{getSlaText(currentRequest.request.createdAt, currentRequest.request.status, now)}</small>
               </div>
 
               <div className="form-group">

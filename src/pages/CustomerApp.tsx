@@ -1,17 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { CustomerPage } from '../components/CustomerPage';
-import { DatabaseManager } from '../utils/database';
+import { SupabaseCustomerPage } from '../components/SupabaseCustomerPage';
 import { supabase, signOut } from '../utils/supabase';
 import type { User } from '@supabase/supabase-js';
 
 interface CustomerAppProps {
   user: User;
   userRole: string | null;
+  onLogout: () => void;
 }
 
-export const CustomerApp: React.FC<CustomerAppProps> = ({ user, userRole }) => {
+export const CustomerApp: React.FC<CustomerAppProps> = ({ user, userRole, onLogout }) => {
   const [now, setNow] = useState(() => new Date());
-  const [db] = useState(() => new DatabaseManager());
 
   useEffect(() => {
     const timer = window.setInterval(() => setNow(new Date()), 1000);
@@ -21,6 +20,7 @@ export const CustomerApp: React.FC<CustomerAppProps> = ({ user, userRole }) => {
   const handleLogout = async () => {
     try {
       await signOut();
+      onLogout();
     } catch (error) {
       console.error('로그아웃 실패:', error);
     }
@@ -52,7 +52,7 @@ export const CustomerApp: React.FC<CustomerAppProps> = ({ user, userRole }) => {
         <strong>고객 화면:</strong> 예약 신청, 상태 확인, 재선택
       </div>
 
-      <CustomerPage db={db} mode="supabase" />
+      <SupabaseCustomerPage client={supabase} user={user} />
 
       <hr style={{ margin: '40px 0', borderColor: '#ddd' }} />
       <div style={{ fontSize: '12px', color: '#666', textAlign: 'center', paddingBottom: '20px' }}>

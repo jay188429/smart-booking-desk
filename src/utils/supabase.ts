@@ -9,11 +9,13 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
+const ADMIN_EMAILS = new Set(['you18676@gmail.com']);
+
 export async function signInWithGoogle() {
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: `${window.location.origin}/auth/callback`,
+      redirectTo: `${window.location.origin}`,
     },
   });
 
@@ -61,15 +63,21 @@ export async function getUserRole() {
   const userMetadata = (user as any).user_metadata || {};
   const appMetadata = (user as any).app_metadata || {};
 
-  // app_metadata에서 role 확인 (우선순위 높음)
+  console.log('getUserRole - email:', user.email);
+  console.log('getUserRole - app_metadata:', appMetadata);
+  console.log('getUserRole - user_metadata:', userMetadata);
+
+  // 요청된 관리자 계정은 UI 진입점을 제공하되, 실제 RPC 권한은 DB가 다시 검증합니다.
+  if (user.email && ADMIN_EMAILS.has(user.email.toLowerCase())) {
+    console.log('관리자 이메일 확인');
+    return 'admin';
+  }
+
   if (appMetadata.role) {
+    console.log('역할 발견 (app_metadata):', appMetadata.role);
     return appMetadata.role;
   }
 
-  // user_metadata에서 role 확인
-  if (userMetadata.role) {
-    return userMetadata.role;
-  }
-
+  console.log('역할 없음');
   return null;
 }

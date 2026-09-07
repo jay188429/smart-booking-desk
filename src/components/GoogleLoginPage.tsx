@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { signInWithGoogle, getCurrentUser, signOut } from '../utils/supabase';
+import React, { useState, useEffect, useRef } from 'react';
+import { signInWithGoogle, getCurrentUser } from '../utils/supabase';
 import type { User } from '@supabase/supabase-js';
 
 interface GoogleLoginPageProps {
@@ -7,17 +7,19 @@ interface GoogleLoginPageProps {
 }
 
 export const GoogleLoginPage: React.FC<GoogleLoginPageProps> = ({ onLoginSuccess }) => {
-  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
+  const hasCalledSuccess = useRef(false);
 
   // 페이지 로드 시 현재 사용자 확인
   useEffect(() => {
     const checkUser = async () => {
       try {
         const currentUser = await getCurrentUser();
-        if (currentUser) {
-          setUser(currentUser);
+        console.log('GoogleLoginPage - 사용자 확인:', currentUser?.email);
+        if (currentUser && !hasCalledSuccess.current) {
+          hasCalledSuccess.current = true;
+          console.log('GoogleLoginPage - onLoginSuccess 호출');
           onLoginSuccess(currentUser);
         }
       } catch (err) {
@@ -28,28 +30,17 @@ export const GoogleLoginPage: React.FC<GoogleLoginPageProps> = ({ onLoginSuccess
     };
 
     checkUser();
-  }, [onLoginSuccess]);
+  }, []);
 
   const handleGoogleLogin = async () => {
     setLoading(true);
     setError('');
     try {
+      console.log('Google 로그인 시작');
       await signInWithGoogle();
     } catch (err) {
+      console.error('Google 로그인 오류:', err);
       setError(err instanceof Error ? err.message : 'Google 로그인 실패');
-      setLoading(false);
-    }
-  };
-
-  const handleLogout = async () => {
-    setLoading(true);
-    setError('');
-    try {
-      await signOut();
-      setUser(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : '로그아웃 실패');
-    } finally {
       setLoading(false);
     }
   };
@@ -58,19 +49,6 @@ export const GoogleLoginPage: React.FC<GoogleLoginPageProps> = ({ onLoginSuccess
     return (
       <div style={{ textAlign: 'center', padding: '40px' }}>
         <p>로딩 중...</p>
-      </div>
-    );
-  }
-
-  if (user) {
-    return (
-      <div style={{ textAlign: 'center', padding: '40px' }}>
-        <h2>로그인 성공</h2>
-        <p>환영합니다, <strong>{user.email}</strong>!</p>
-        <p>이메일: {user.email}</p>
-        <button onClick={handleLogout} className="btn btn-secondary" style={{ marginTop: '20px' }}>
-          로그아웃
-        </button>
       </div>
     );
   }
