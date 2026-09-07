@@ -1,13 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CustomerPage } from '../components/CustomerPage';
 import { AdminPage } from '../components/AdminPage';
 import { DatabaseManager } from '../utils/database';
-import { REFERENCE_TIME } from '../utils/constants';
 
 type Mode = 'local' | 'supabase';
 type Role = 'customer' | 'admin';
 
 const App: React.FC = () => {
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(new Date()), 1000);
+    return () => window.clearInterval(timer);
+  }, []);
   const [mode] = useState<Mode>('local');
   const [role, setRole] = useState<Role>('customer');
   const [db] = useState(() => new DatabaseManager());
@@ -29,7 +33,7 @@ const App: React.FC = () => {
         <div>
           <h1>cal.dudu-works.com</h1>
           <div className="reference-time">
-            기준 시각: {REFERENCE_TIME.toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })} (고정)
+            기준 시각: {now.toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })} (한국 현재 시각)
           </div>
         </div>
 

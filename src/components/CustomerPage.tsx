@@ -4,7 +4,7 @@ import type { Slot, Request, Candidate } from '../types';
 import { OperationManager } from '../utils/operations';
 import { DatabaseManager } from '../utils/database';
 import { decideRequestStatus } from '../utils/decide';
-import { TIME_SLOTS } from '../utils/constants';
+import { TIME_SLOTS, isSlotOpen } from '../utils/constants';
 
 interface CustomerPageProps {
   db: DatabaseManager;
@@ -17,7 +17,7 @@ export const CustomerPage: React.FC<CustomerPageProps> = ({ db }) => {
   const [selectedSlots, setSelectedSlots] = useState<string[]>([]);
   const [slots, setSlots] = useState<Record<string, Slot>>({});
   const [customerRequests, setCustomerRequests] = useState<
-    Array<{ request: Request; candidates: Candidate[]; decision: any }>
+    Array<{ request: Request; candidates: Candidate[]; history: Candidate[]; decision: any }>
   >([]);
   const [error, setError] = useState<string>('');
   const [success, setSuccess] = useState<string>('');
@@ -29,6 +29,19 @@ export const CustomerPage: React.FC<CustomerPageProps> = ({ db }) => {
   useEffect(() => {
     loadData();
   }, [customerId]);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      const status = om.getCustomerStatus(customerId);
+      setSlots(db.getState().slots);
+      setCustomerRequests(status);
+      if (stage === 'view' && status[status.length - 1]?.request.status === 'needs_reselection') {
+        setSelectedSlots([]);
+        setStage('reselect');
+      }
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, [customerId, stage, db]);
 
   const loadData = () => {
     const state = db.getState();
@@ -169,6 +182,8 @@ export const CustomerPage: React.FC<CustomerPageProps> = ({ db }) => {
       {error && <div className="alert alert-error">{error}</div>}
       {success && <div className="alert alert-success">{success}</div>}
 
+      {!Object.values(slots).some(slot => isSlotOpen(slot)) && <p role="status">예약 가능한 시간이 없습니다. 모든 시간이 마감되었거나 예약 기간이 종료되었습니다.</p>}
+
       {stage === 'select' && (
         <div>
           <h3>슬롯 선택 (1~3개)</h3>
@@ -286,7 +301,7 @@ export const CustomerPage: React.FC<CustomerPageProps> = ({ db }) => {
                 <ul className="list">
                   {item.candidates.map((c, cidx) => {
                     const slot = slots[c.slotId];
-                    const isAvailable = slot?.status === 'available';
+                    const isAvailable = isSlotOpen(slot);
                     return (
                       <li key={c.id}>
                         <span>
@@ -301,6 +316,13 @@ export const CustomerPage: React.FC<CustomerPageProps> = ({ db }) => {
                   })}
                 </ul>
               </div>
+
+              {item.history.length > 0 && (
+                <details>
+                  <summary>이전 선택 이력</summary>
+                  <ul>{item.history.map(c => <li key={c.id}>버전 {c.version} · 희망 {c.priority}: {slots[c.slotId]?.date} {TIME_SLOTS.find(t => t.label === slots[c.slotId]?.timeLabel)?.displayLabel}</li>)}</ul>
+                </details>
+              )}
 
               {item.request.status === 'confirmed' && (
                 <div className="alert alert-success">

@@ -2,6 +2,7 @@
 import { DatabaseManager } from './database';
 import { validateSubmission, validateConfirmation, decideRequestStatus } from './decide';
 import type { OperationLog } from '../types';
+import { isSlotOpen } from './constants';
 
 export class OperationManager {
   private db: DatabaseManager;
@@ -44,9 +45,9 @@ export class OperationManager {
 
       // 고객당 1개 신청만 허용 (미확정 요청이 없어야 함)
       const existingRequests = this.db.getRequestsByCustomerId(customerId);
-      const hasPendingRequest = existingRequests.some(r => r.status !== 'confirmed');
+      const hasPendingRequest = existingRequests.length > 0;
       if (hasPendingRequest) {
-        logError = 'Customer already has a pending request';
+        logError = 'Customer already has a pending request or confirmed reservation';
         result = { success: false, error: logError };
         this.db.rollbackTransaction();
         return result;
@@ -175,7 +176,7 @@ export class OperationManager {
           // 현재 version에서 available 슬롯이 남아있는지 확인
           const hasAvailable = otherCurrentCandidates.some(c => {
             const slot = currentSlots[c.slotId];
-            return slot && slot.status === 'available';
+            return isSlotOpen(slot);
           });
 
           if (!hasAvailable) {
@@ -261,8 +262,8 @@ export class OperationManager {
       }
 
       // 이전 요청의 상태 확인
-      if (previousRequest.status === 'confirmed') {
-        logError = 'Cannot reselect confirmed request';
+      if (previousRequest.status === 'confirmed' || decideRequestStatus(previousRequest, this.db.getAllCandidates(), this.db.getState().slots).status !== 'all_unavailable') {
+        logError = 'Cannot reselect: 재선택 필요 상태에서만 가능합니다';
         result = { success: false, error: logError };
         return result;
       }
@@ -326,11 +327,12 @@ export class OperationManager {
     const slots = this.db.getState().slots;
 
     return requests.map(request => {
-      const requestCandidates = candidates.filter(c => c.requestId === request.id);
+      const requestCandidates = candidates.filter(c => c.requestId === request.id && c.version === request.version);
       const decision = decideRequestStatus(request, candidates, slots);
 
       return {
-        request,
+        request: request.status !== 'confirmed' && decision.status === 'all_unavailable' ? { ...request, status: 'needs_reselection' as const } : request,
+        history: candidates.filter(c => c.requestId === request.id && c.version < request.version),
         candidates: requestCandidates.sort((a, b) => a.priority - b.priority),
         decision,
       };
@@ -344,13 +346,17 @@ export class OperationManager {
     const slots = this.db.getState().slots;
 
     return requests
-      .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+      .slice()
+      .sort((a, b) => {
+        const sequence = (request: typeof a) => Math.min(...candidates.filter(c => c.requestId === request.id && c.version === request.version).map(c => c.queueSeq));
+        return sequence(a) - sequence(b);
+      })
       .map(request => {
-        const requestCandidates = candidates.filter(c => c.requestId === request.id);
+        const requestCandidates = candidates.filter(c => c.requestId === request.id && c.version === request.version);
         const decision = decideRequestStatus(request, candidates, slots);
 
         return {
-          request,
+          request: request.status !== 'confirmed' && decision.status === 'all_unavailable' ? { ...request, status: 'needs_reselection' as const } : request,
           candidates: requestCandidates.sort((a, b) => a.priority - b.priority),
           decision,
         };

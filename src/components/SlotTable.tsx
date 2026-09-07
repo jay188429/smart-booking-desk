@@ -1,6 +1,6 @@
 import React from 'react';
 import type { Slot } from '../types';
-import { TIME_SLOTS, getAllDates } from '../utils/constants';
+import { TIME_SLOTS, getAllDates, isSlotOpen } from '../utils/constants';
 
 interface SlotTableProps {
   slots: Record<string, Slot>;
@@ -40,13 +40,13 @@ export const SlotTable: React.FC<SlotTableProps> = ({
                 const slotId = `${date}:${timeSlot.label}`;
                 const slot = slots[slotId];
                 const isSelected = selectedSlots.includes(slotId);
-                const isConfirmed = slot?.status === 'confirmed';
+                const isConfirmed = !isSlotOpen(slot);
 
                 return (
                   <td key={slotId}>
                     {mode === 'view' ? (
                       <span className={`slot-status ${slot?.status || 'available'}`}>
-                        {slot?.status === 'confirmed' ? '마감' : '가능'}
+                        {isConfirmed ? '마감' : '가능'}
                       </span>
                     ) : (
                       <>

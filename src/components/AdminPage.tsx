@@ -3,7 +3,7 @@ import { SlotTable } from './SlotTable';
 import type { Slot, Request, Candidate, OperationLog } from '../types';
 import { OperationManager } from '../utils/operations';
 import { DatabaseManager } from '../utils/database';
-import { TIME_SLOTS } from '../utils/constants';
+import { TIME_SLOTS, isSlotOpen } from '../utils/constants';
 
 interface AdminPageProps {
   db: DatabaseManager;
@@ -29,6 +29,14 @@ export const AdminPage: React.FC<AdminPageProps> = ({ db }) => {
   useEffect(() => {
     loadData();
   }, []);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setSlots(db.getState().slots);
+      setRequests(om.getAdminRequests());
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, [db]);
 
   const loadData = () => {
     const state = db.getState();
@@ -156,7 +164,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ db }) => {
                 <ul className="list">
                   {currentRequest.candidates.map((c, idx) => {
                     const slot = slots[c.slotId];
-                    const isAvailable = slot?.status === 'available';
+                    const isAvailable = isSlotOpen(slot);
                     return (
                       <li
                         key={c.id}
@@ -204,7 +212,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ db }) => {
                 <button
                   className="btn btn-success"
                   onClick={handleConfirm}
-                  disabled={!selectedSlotForConfirm || loading}
+                  disabled={!selectedSlotForConfirm || !isSlotOpen(slots[selectedSlotForConfirm]) || loading}
                   style={{ marginTop: '10px', width: '100%' }}
                 >
                   {loading ? '처리 중...' : '확정'}

@@ -1,5 +1,6 @@
 // 후보 가능 여부 판정 로직
 import type { Slot, Request, Candidate } from '../types';
+import { isSlotOpen } from './constants';
 
 export interface DecisionResult {
   isValid: boolean; // 모든 후보가 유효한가
@@ -23,7 +24,7 @@ export function decideRequestStatus(
   }
 
   // 이 요청의 후보들
-  const requestCandidates = candidates.filter(c => c.requestId === request.id);
+  const requestCandidates = candidates.filter(c => c.requestId === request.id && c.version === request.version);
 
   if (requestCandidates.length === 0) {
     return {
@@ -49,7 +50,7 @@ export function decideRequestStatus(
     }
 
     // 마감 상태 확인
-    if (slot.status === 'confirmed') {
+    if (!isSlotOpen(slot)) {
       allUnavailable.push(true);
     } else {
       allUnavailable.push(false);
@@ -123,7 +124,7 @@ export function validateSubmission(
     }
 
     // 마감 여부
-    if (slot.status === 'confirmed') {
+    if (!isSlotOpen(slot)) {
       return {
         valid: false,
         error: `슬롯이 마감되었습니다: ${slot.date} ${slot.timeLabel}`,
@@ -156,7 +157,7 @@ export function validateConfirmation(
 
   // 선택한 슬롯이 원래 희망에 있는가
   const hasCandidate = candidates.some(
-    c => c.requestId === request.id && c.slotId === slotId
+    c => c.requestId === request.id && c.version === request.version && c.slotId === slotId
   );
 
   if (!hasCandidate) {
@@ -175,10 +176,10 @@ export function validateConfirmation(
     };
   }
 
-  if (slot.status === 'confirmed') {
+  if (!isSlotOpen(slot)) {
     return {
       valid: false,
-      error: '이미 확정된 슬롯입니다',
+      error: '이미 마감되었거나 시작 시각이 지난 슬롯입니다',
     };
   }
 

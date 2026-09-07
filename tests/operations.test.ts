@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { DatabaseManager } from '../src/utils/database';
 import { OperationManager } from '../src/utils/operations';
 
@@ -6,7 +6,11 @@ describe('OperationManager', () => {
   let db: DatabaseManager;
   let om: OperationManager;
 
+  afterEach(() => vi.useRealTimers());
+
   beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-09-07T08:00:00+09:00'));
     db = new DatabaseManager();
     db.reset();
     om = new OperationManager(db);
@@ -66,16 +70,16 @@ describe('OperationManager', () => {
       expect(result2.error).toContain('pending request');
     });
 
-    it('should allow resubmit after reselection', async () => {
+    it('should reject a second reservation after confirmation', async () => {
       const r1 = await om.submitRequest('C01', ['2026-09-09:am'], 'op-1');
       const req1 = db.getRequest(r1.requestId!);
 
       // 확정
       await om.confirmRequest(req1!.id, '2026-09-09:am', 'ADMIN', 'op-confirm');
 
-      // 다시 신청 가능
+      // PRD: 고객당 신청 하나, 확정 후 새 신청 금지
       const r2 = await om.submitRequest('C01', ['2026-09-09:pm'], 'op-3');
-      expect(r2.success).toBe(true);
+      expect(r2.success).toBe(false);
     });
   });
 
