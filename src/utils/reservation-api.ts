@@ -1,6 +1,6 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type { Slot } from '../types';
-export interface Booking { id: string; customer_id: string; customer_email?: string | null; version: number; created_at: string; status: 'received' | 'needs_reselection' | 'confirmed'; confirmed_slot_id: string | null }
+export interface Booking { id: string; customer_id: string; customer_email?: string | null; version: number; created_at: string; updated_at: string; confirmed_at: string | null; status: 'received' | 'needs_reselection' | 'confirmed'; confirmed_slot_id: string | null }
 export interface Wish { id: string; request_id: string; slot_id: string; priority: number; version: number; queue_seq: number }
 export interface Audit { id: string; operation_id: string; action: string; request_id: string | null; status: string; error_message: string | null }
 export interface Snapshot { slots: Record<string, Slot>; requests: Booking[]; candidates: Wish[]; logs: Audit[] }
@@ -33,7 +33,7 @@ export async function readSnapshot(client: SupabaseClient, userId: string, admin
     } else if (/admin_request_overview|schema cache|not find/i.test(overviewResult.error.message)) {
       requestResult = await client
         .from('requests')
-        .select('id,customer_id,version,created_at,status,confirmed_slot_id')
+        .select('id,customer_id,version,created_at,updated_at,confirmed_at,status,confirmed_slot_id')
         .returns<Booking[]>();
     } else {
       requestResult = overviewResult;
@@ -41,7 +41,7 @@ export async function readSnapshot(client: SupabaseClient, userId: string, admin
   } else {
     requestResult = await client
       .from('requests')
-      .select('id,customer_id,version,created_at,status,confirmed_slot_id')
+      .select('id,customer_id,version,created_at,updated_at,confirmed_at,status,confirmed_slot_id')
       .eq('customer_id', userId)
       .returns<Booking[]>();
   }
@@ -67,7 +67,7 @@ export async function readSnapshot(client: SupabaseClient, userId: string, admin
   }
   return { slots, requests, candidates, logs };
 }
-export type WriteAction = 'submit_request' | 'resubmit_request' | 'confirm_request';
+export type WriteAction = 'submit_request' | 'resubmit_request' | 'confirm_request' | 'cancel_request';
 // 응답 유실 시에도 같은 입력의 재시도에 같은 ID를 사용하며 데모 데이터는 건드리지 않습니다.
 export async function writeReservation(client: SupabaseClient, userId: string, action: WriteAction, payload: Record<string, unknown>, storage: Pick<Storage, 'getItem' | 'setItem' | 'removeItem'> = sessionStorage) {
   const scope = `cal_dudu_rpc:${userId}:${action}:${JSON.stringify(payload)}`;

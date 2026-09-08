@@ -63,11 +63,12 @@ describe('PRD 예약 시나리오 회귀 검사', () => {
     expect(om.getCustomerStatus('C02')[0].request.status).toBe('needs_reselection');
   });
 
-  it('42슬롯은 한국 날짜로 고정되고 기간 종료 후 표의 모든 선택이 비활성화', () => {
+  it('42슬롯은 한국 날짜로 고정되고 기간 종료 후 달력과 시간 선택이 비활성화', () => {
     expect(getAllDates()).toEqual(Array.from({ length: 14 }, (_, i) => `2026-09-${String(i + 9).padStart(2, '0')}`));
     expect(db.getAllSlots()).toHaveLength(42);
     vi.setSystemTime(new Date('2026-09-22T18:00:00+09:00'));
     const html = renderToStaticMarkup(createElement(SlotTable, { slots: db.getState().slots, selectedSlots: [], onToggle: () => {}, mode: 'select' }));
-    expect(html.match(/disabled=""/g)).toHaveLength(42);
+    expect(html.match(/<button[^>]*calendar-day[^>]*disabled=""/g)).toHaveLength(30);
+    expect(html.match(/<button[^>]*time-option[^>]*disabled=""/g)).toHaveLength(3);
   });
 });

@@ -4,7 +4,7 @@ import { GoogleLoginPage } from '../components/GoogleLoginPage';
 import { CustomerApp } from './CustomerApp';
 import { AdminApp } from './AdminApp';
 import { LocalDemoApp } from './LocalDemoApp';
-import { getCurrentUser, getUserRole, signOut } from '../utils/supabase';
+import { getCurrentUser, getUserRole, signOut, supabase } from '../utils/supabase';
 import type { User } from '@supabase/supabase-js';
 
 const AppContent: React.FC = () => {
@@ -23,9 +23,6 @@ const AppContent: React.FC = () => {
 
         if (currentUser) {
           setUser(currentUser);
-          const role = await getUserRole();
-          console.log('[App] 초기화 - 역할:', role);
-          setUserRole(role);
         }
       } catch (err) {
         console.error('[App] 초기화 오류:', err);
@@ -36,6 +33,34 @@ const AppContent: React.FC = () => {
 
     init();
   }, [localDemo]);
+
+  useEffect(() => {
+    if (!user) {
+      setUserRole(null);
+      return;
+    }
+
+    let active = true;
+    void getUserRole().then(role => {
+      if (active) {
+        console.log('[App] 역할 갱신:', role);
+        setUserRole(role);
+      }
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [user]);
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      if (!session) setUserRole(null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const handleLogout = async () => {
     console.log('[App] 로그아웃');
@@ -57,11 +82,7 @@ const AppContent: React.FC = () => {
       <GoogleLoginPage
         onLoginSuccess={async (newUser) => {
           console.log('[App] 로그인 성공:', newUser.email);
-          const role = await getUserRole();
-          console.log('[App] 로그인 후 역할:', role);
-
           setUser(newUser);
-          setUserRole(role);
         }}
       />
     );

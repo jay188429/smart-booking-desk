@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import type { SupabaseClient, User } from '@supabase/supabase-js';
 import { SlotTable } from './SlotTable';
 import { readSnapshot, writeReservation, type Snapshot } from '../utils/reservation-api';
-import { TIME_SLOTS, isSlotOpen, parseSlotId } from '../utils/constants';
+import { TIME_SLOTS, parseSlotId } from '../utils/constants';
 import { getSlaState, getSlaText } from '../utils/sla';
 import { recommendAlternativeSlots } from '../utils/recommend';
 
@@ -17,11 +17,13 @@ export const SupabaseCustomerPage: React.FC<Props> = ({ client, user }) => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [now, setNow] = useState(() => Date.now());
+  const [lastCheckedAt, setLastCheckedAt] = useState<number | null>(null);
 
   const load = async () => {
     setLoading(true);
     try {
       setSnapshot(await readSnapshot(client, user.id, false));
+      setLastCheckedAt(Date.now());
       setError('');
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : String(reason));
@@ -94,10 +96,36 @@ export const SupabaseCustomerPage: React.FC<Props> = ({ client, user }) => {
     : [];
   const displayName = String(user.user_metadata?.full_name || user.user_metadata?.name || user.email || user.id);
 
+  const formatCommunicationTime = (value: string | null | undefined) => value
+    ? new Date(value).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul', month: 'numeric', day: 'numeric', hour: 'numeric', minute: '2-digit' })
+    : '방금 전';
+
   const beginReview = () => {
     if (!canSubmit) return;
     setError('');
     setReviewing(true);
+  };
+
+  const cancelPendingRequest = async () => {
+    if (!currentRequest || currentRequest.status === 'confirmed') return;
+    if (!window.confirm('아직 확정되지 않은 신청을 취소하고 새로 선택할까요?')) return;
+    setSaving(true);
+    setError('');
+    setSuccess('');
+    try {
+      await writeReservation(client, user.id, 'cancel_request', {
+        p_customer_id: user.id,
+        p_request_id: currentRequest.id,
+      });
+      setReviewing(false);
+      setSelectedSlots([]);
+      setSuccess('기존 신청을 취소했습니다. 새로운 시간을 선택해 주세요.');
+      await load();
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : String(reason));
+    } finally {
+      setSaving(false);
+    }
   };
 
   if (loading && !snapshot) return <p>Supabase 데이터를 불러오는 중...</p>;
@@ -159,7 +187,46 @@ export const SupabaseCustomerPage: React.FC<Props> = ({ client, user }) => {
           {currentRequest.status === 'received' && (
             <p className="booking-status-next">이 페이지는 5초마다 예약 상태를 확인합니다. 페이지를 닫아도 신청은 유지됩니다.</p>
           )}
+          {currentRequest.status !== 'confirmed' && (
+            <button className="booking-cancel-button" type="button" onClick={() => void cancelPendingRequest()} disabled={saving}>
+              신청 취소 후 다시 선택
+            </button>
+          )}
           </section>
+          )}
+          {currentRequest && (
+            <section className="communication-panel" aria-label="예약 상태 업데이트">
+              <div className="communication-heading">
+                <div>
+                  <span className="eyebrow">예약 알림</span>
+                  <h3>예약 상태 업데이트</h3>
+                </div>
+                <span className="communication-live"><i /> 자동 확인 중</span>
+              </div>
+              <div className="communication-timeline">
+                <div className="communication-item complete">
+                  <span className="communication-icon">✓</span>
+                  <div><strong>신청이 접수되었습니다</strong><p>희망하신 시간이 운영자에게 전달되었습니다.</p><time>{formatCommunicationTime(currentRequest.created_at)}</time></div>
+                </div>
+                {currentRequest.status === 'received' ? (
+                  <div className="communication-item active">
+                    <span className="communication-icon">·</span>
+                    <div><strong>운영자가 시간을 확인하고 있습니다</strong><p>확정되면 이 화면에 바로 안내됩니다.</p><time>다음 자동 확인까지 5초</time></div>
+                  </div>
+                ) : currentRequest.status === 'confirmed' ? (
+                  <div className="communication-item complete">
+                    <span className="communication-icon">✓</span>
+                    <div><strong>예약 확정 안내</strong><p>확정된 시간으로 상담 예약이 완료되었습니다.</p><time>{formatCommunicationTime(currentRequest.confirmed_at || currentRequest.updated_at)}</time></div>
+                  </div>
+                ) : (
+                  <div className="communication-item attention">
+                    <span className="communication-icon">!</span>
+                    <div><strong>새로운 시간 선택이 필요합니다</strong><p>기존 희망 시간이 모두 마감되어 다시 선택해 주세요.</p><time>{formatCommunicationTime(currentRequest.updated_at)}</time></div>
+                  </div>
+                )}
+              </div>
+              {lastCheckedAt && <p className="communication-refresh">마지막 확인 {formatCommunicationTime(new Date(lastCheckedAt).toISOString())} · 페이지를 닫아도 신청은 유지됩니다.</p>}
+            </section>
           )}
           {currentCandidates.length > 0 && (
         <div className="candidate-summary">
@@ -219,10 +286,6 @@ export const SupabaseCustomerPage: React.FC<Props> = ({ client, user }) => {
           {currentRequest?.confirmed_slot_id && (
         <p className="alert alert-success">확정 슬롯: {currentRequest.confirmed_slot_id}</p>
           )}
-          <button className="btn btn-secondary" onClick={() => void load()} disabled={loading}>새로고침</button>
-          <small>
-            {TIME_SLOTS.length}개 시간대, 서버 가용성 기준. {Object.values(slots).filter(slot => isSlotOpen(slot)).length}개 선택 가능
-          </small>
         </main>
       </div>
     </div>

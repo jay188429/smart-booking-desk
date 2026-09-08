@@ -47,46 +47,45 @@ export const GoogleLoginPage: React.FC<GoogleLoginPageProps> = ({ onLoginSuccess
 
   if (loading) {
     return (
-      <div style={{ textAlign: 'center', padding: '40px' }}>
-        <p>로딩 중...</p>
-      </div>
+      <div className="login-loading"><span className="login-spinner" />불러오는 중...</div>
     );
   }
 
   return (
-    <div style={{ maxWidth: '400px', margin: '60px auto', textAlign: 'center', padding: '20px' }}>
-      <h1>cal.dudu-works.com</h1>
-      <h2>Google로 로그인</h2>
+    <div className="login-page">
+      <div className="login-panel">
+        <div className="login-panel-bar">◆ <span>Powered by cal.dudu</span></div>
+        <div className="login-columns">
+          <section className="login-intro">
+            <div className="login-avatar" aria-hidden="true">d</div>
+            <span className="eyebrow">cal.dudu</span>
+            <h1>예약 상담</h1>
+            <p>가능한 시간을 선택하고 운영자 확인을 거쳐 상담 예약을 완료하세요.</p>
+            <div className="login-detail"><span aria-hidden="true">◷</span>30분 상담</div>
+            <div className="login-detail"><span aria-hidden="true">◎</span>Asia / Seoul</div>
+            <div className="login-intro-footer">간단한 로그인 후 예약 가능한 시간을 확인할 수 있습니다.</div>
+          </section>
 
-      {error && (
-        <div className="alert alert-error" style={{ marginBottom: '20px' }}>
-          <strong>오류:</strong> {error}
+          <section className="login-form-panel">
+            <div className="login-form-heading">
+              <span className="eyebrow">Welcome</span>
+              <h2>로그인하여 예약하기</h2>
+              <p>예약 신청과 확정 상태를 안전하게 확인합니다.</p>
+            </div>
+            {error && (
+              <div className="alert alert-error login-error">
+                <strong>로그인 오류</strong><br />{error}
+              </div>
+            )}
+            <button className="google-login-button" onClick={handleGoogleLogin} disabled={loading}>
+              <span className="google-mark" aria-hidden="true">G</span>
+              {loading ? '로그인 중...' : 'Google로 계속'}
+            </button>
+            <p className="login-legal">로그인하면 예약 시스템 이용에 동의한 것으로 간주됩니다.</p>
+          </section>
         </div>
-      )}
-
-      <button
-        onClick={handleGoogleLogin}
-        disabled={loading}
-        style={{
-          width: '100%',
-          padding: '12px',
-          fontSize: '16px',
-          backgroundColor: '#4285F4',
-          color: 'white',
-          border: 'none',
-          borderRadius: '4px',
-          cursor: loading ? 'not-allowed' : 'pointer',
-          opacity: loading ? 0.6 : 1,
-        }}
-      >
-        {loading ? '로그인 중...' : 'Google로 계속'}
-      </button>
-
-      <p style={{ marginTop: '20px', fontSize: '12px', color: '#666' }}>
-        Google 계정으로 로그인하면 예약 시스템에 접속할 수 있습니다.
-        <br />
-        관리자: you18676@gmail.com
-      </p>
+      </div>
+      <p className="login-footer">cal.dudu-works.com · 예약 관리</p>
     </div>
   );
 };
