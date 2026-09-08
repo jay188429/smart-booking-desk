@@ -38,7 +38,7 @@ export const AdminApp: React.FC<AdminAppProps> = ({ user, onLogout }) => {
         </div>
         <div className="role-selector">
           <button
-            className="btn btn-secondary"
+            className="btn logout-button"
             onClick={handleLogout}
             style={{ padding: '6px 12px', fontSize: '12px', marginLeft: '10px' }}
           >

@@ -92,7 +92,7 @@ export const SupabaseApp: React.FC<SupabaseAppProps> = () => {
         <div className="role-selector">
           <span className="mode-badge supabase">Supabase 모드</span>
           <button
-            className="btn btn-secondary"
+            className="btn logout-button"
             onClick={handleLogout}
             style={{ padding: '6px 12px', fontSize: '12px', marginLeft: '10px' }}
           >
