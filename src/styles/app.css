@@ -342,6 +342,20 @@ body {
   color: var(--ink-soft);
 }
 
+.welcome-message {
+  display: grid;
+  gap: 2px;
+  margin-top: 7px;
+  color: var(--ink-soft);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.welcome-message strong {
+  color: #f4fbf7;
+  font-size: 14px;
+}
+
 .role-selector {
   display: flex;
   gap: 10px;
@@ -690,6 +704,101 @@ body {
 .customer-page {
   max-width: 1120px;
   margin: 0 auto;
+}
+
+.customer-app-shell {
+  max-width: 1180px;
+  padding-top: 16px;
+  padding-bottom: 34px;
+}
+
+.customer-app-shell .header {
+  max-width: 1120px;
+  margin: 0 auto 18px;
+  padding: 0 4px 14px;
+  border-bottom-color: rgba(184, 201, 216, 0.14);
+}
+
+.customer-app-shell .header h1 {
+  color: #f7fbff;
+  font-size: 19px;
+  letter-spacing: 0.01em;
+}
+
+.customer-app-shell .reference-time {
+  margin-top: 6px;
+  font-size: 11px;
+}
+
+.customer-app-shell .reference-time span {
+  color: #8196aa !important;
+}
+
+.customer-app-shell > .alert-info {
+  max-width: 1120px;
+  margin: 0 auto 18px;
+  padding: 9px 14px;
+  border: 1px solid rgba(109, 224, 208, 0.2);
+  border-left: 2px solid var(--cyan);
+  border-radius: 4px;
+  background: #0a1c30;
+  color: #bfd0dd;
+  font-size: 11px;
+}
+
+.customer-app-shell .booking-shell {
+  position: relative;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding-top: 38px;
+  border-color: rgba(184, 201, 216, 0.28);
+  border-radius: 8px;
+  background: #0a1b2e;
+}
+
+.customer-app-shell .booking-shell::before {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 38px;
+  border-bottom: 4px solid #2bd477;
+  background: #202220;
+  color: #aeb8b1;
+  content: '◆  Powered by cal.dudu';
+  font-size: 11px;
+  letter-spacing: 0.02em;
+}
+
+.customer-app-shell .booking-sidebar {
+  background: #07182a;
+}
+
+.customer-app-shell .booking-main {
+  background: #0d2743;
+}
+
+.customer-app-shell > hr {
+  max-width: 1120px;
+  margin: 24px auto !important;
+  border-color: rgba(184, 201, 216, 0.12) !important;
+}
+
+.customer-app-shell > div:last-child {
+  max-width: 1120px;
+  margin: 0 auto;
+  color: #71869a !important;
+}
+
+.customer-app-shell > div:last-child p {
+  margin: 5px 0;
+}
+
+.customer-app-shell > div:last-child a {
+  color: var(--cyan);
 }
 
 .customer-page > p:first-child {
@@ -1471,19 +1580,31 @@ body {
 }
 
 .booking-cancel-button {
-  margin-top: 18px;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: #ffb39f;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  margin-top: 22px;
+  padding: 0 18px;
+  border: 1px solid rgba(255, 179, 159, 0.72);
+  border-radius: 22px;
+  background: rgba(255, 179, 159, 0.08);
+  color: #ffd0c4;
   font: inherit;
-  font-size: 12px;
-  text-decoration: underline;
+  font-size: 14px;
+  font-weight: 700;
   cursor: pointer;
 }
 
 .booking-cancel-button:hover:not(:disabled) {
-  color: #ffd0c4;
+  border-color: #ffd0c4;
+  background: rgba(255, 179, 159, 0.18);
+  color: #fff;
+}
+
+.booking-cancel-button:disabled {
+  cursor: wait;
+  opacity: 0.55;
 }
 
 .candidate-summary {
@@ -1525,6 +1646,22 @@ body {
 }
 
 @media (max-width: 560px) {
+  .customer-app-shell {
+    padding: 10px 10px 24px;
+  }
+
+  .customer-app-shell .header {
+    padding: 0 2px 12px;
+  }
+
+  .customer-app-shell .booking-shell {
+    padding-top: 34px;
+  }
+
+  .customer-app-shell .booking-shell::before {
+    height: 34px;
+  }
+
   .login-page {
     padding: 14px;
   }

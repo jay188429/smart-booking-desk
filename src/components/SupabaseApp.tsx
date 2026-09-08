@@ -84,8 +84,10 @@ export const SupabaseApp: React.FC<SupabaseAppProps> = () => {
       <div className="header">
         <div>
           <h1>cal.dudu-works.com</h1>
-          <div className="reference-time" style={{ fontSize: '12px', color: '#666' }}>
-            로그인: {user.email} {userRole === 'admin' ? '(관리자)' : '(고객)'}
+          <div className="welcome-message">
+            <strong>{user.user_metadata?.name || user.user_metadata?.full_name || user.email?.split('@')[0] || '고객'}님 안녕하세요</strong>
+            <span>오늘 하루는 어떠신가요?</span>
+            <span>날씨가 참 좋네요.</span>
           </div>
         </div>
 

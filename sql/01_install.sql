@@ -143,7 +143,7 @@ CREATE TABLE IF NOT EXISTS operation_logs (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   operation_id TEXT UNIQUE,
   timestamp TIMESTAMPTZ DEFAULT NOW(),
-  action TEXT NOT NULL CHECK (action IN ('submit', 'confirm', 'reselect', 'cancel')),
+  action TEXT NOT NULL CHECK (action IN ('submit', 'confirm', 'reselect')),
   request_id UUID,
   admin_id TEXT,
   slot_id TEXT,
@@ -256,59 +256,7 @@ END;
 $$;
 
 -- ====================================================
--- 7. RPC: 고객 신청 취소
--- ====================================================
-
-CREATE OR REPLACE FUNCTION private.cancel_request(
-  p_customer_id TEXT,
-  p_request_id UUID,
-  p_operation_id TEXT
-)
-RETURNS JSONB
-SECURITY DEFINER
-SET search_path = ''
-LANGUAGE plpgsql
-AS $$
-DECLARE
-  v_request_status TEXT;
-BEGIN
-  PERFORM pg_catalog.pg_advisory_xact_lock(20260909);
-  IF auth.uid() IS NULL OR p_customer_id != auth.uid()::text THEN
-    RETURN jsonb_build_object('success', false, 'error', 'Not authorized');
-  END IF;
-
-  IF EXISTS (
-    SELECT 1 FROM public.operation_logs
-    WHERE operation_id = p_operation_id AND action = 'cancel' AND status = 'success' AND request_id = p_request_id
-  ) THEN
-    RETURN jsonb_build_object('success', true, 'requestId', p_request_id::text);
-  END IF;
-
-  SELECT status INTO v_request_status
-  FROM public.requests
-  WHERE id = p_request_id AND customer_id = auth.uid()::text
-  FOR UPDATE;
-
-  IF v_request_status IS NULL THEN
-    RETURN jsonb_build_object('success', false, 'error', 'Request not found or not owner');
-  END IF;
-  IF v_request_status = 'confirmed' THEN
-    RETURN jsonb_build_object('success', false, 'error', 'Confirmed request cannot be cancelled');
-  END IF;
-
-  INSERT INTO public.operation_logs (operation_id, action, request_id, status)
-  VALUES (p_operation_id, 'cancel', p_request_id, 'success');
-  DELETE FROM public.requests WHERE id = p_request_id;
-  RETURN jsonb_build_object('success', true, 'requestId', p_request_id::text);
-EXCEPTION WHEN OTHERS THEN
-  INSERT INTO public.operation_logs (operation_id, action, request_id, status, error_message)
-  VALUES (p_operation_id, 'cancel', p_request_id, 'failed', SQLERRM);
-  RETURN jsonb_build_object('success', false, 'error', SQLERRM);
-END;
-$$;
-
--- ====================================================
--- 8. RPC: 어드민 확정
+-- 7. RPC: 어드민 확정
 -- ====================================================
 
 CREATE OR REPLACE FUNCTION private.confirm_request(
@@ -621,13 +569,6 @@ REVOKE ALL ON FUNCTION private.submit_request(text, text[], text) FROM PUBLIC, a
 GRANT EXECUTE ON FUNCTION private.submit_request(text, text[], text) TO authenticated;
 REVOKE ALL ON FUNCTION public.submit_request(text, text[], text) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.submit_request(text, text[], text) TO authenticated;
-
-CREATE OR REPLACE FUNCTION public.cancel_request(p_customer_id text, p_request_id uuid, p_operation_id text) RETURNS jsonb
-LANGUAGE sql SECURITY INVOKER SET search_path = '' AS $$ SELECT private.cancel_request(p_customer_id, p_request_id, p_operation_id) $$;
-REVOKE ALL ON FUNCTION private.cancel_request(text, uuid, text) FROM PUBLIC, anon;
-GRANT EXECUTE ON FUNCTION private.cancel_request(text, uuid, text) TO authenticated;
-REVOKE ALL ON FUNCTION public.cancel_request(text, uuid, text) FROM PUBLIC, anon;
-GRANT EXECUTE ON FUNCTION public.cancel_request(text, uuid, text) TO authenticated;
 
 CREATE OR REPLACE FUNCTION public.confirm_request(p_request_id uuid, p_slot_id text, p_admin_id text, p_operation_id text) RETURNS jsonb
 LANGUAGE sql SECURITY INVOKER SET search_path = '' AS $$ SELECT private.confirm_request(p_request_id, p_slot_id, p_admin_id, p_operation_id) $$;

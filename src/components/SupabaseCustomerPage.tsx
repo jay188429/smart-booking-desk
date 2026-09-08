@@ -5,6 +5,7 @@ import { readSnapshot, writeReservation, type Snapshot } from '../utils/reservat
 import { TIME_SLOTS, parseSlotId } from '../utils/constants';
 import { getSlaState, getSlaText } from '../utils/sla';
 import { recommendAlternativeSlots } from '../utils/recommend';
+import { sendBookingEmail } from '../utils/booking-email';
 
 interface Props { client: SupabaseClient; user: User }
 
@@ -15,7 +16,6 @@ export const SupabaseCustomerPage: React.FC<Props> = ({ client, user }) => {
   const [saving, setSaving] = useState(false);
   const [reviewing, setReviewing] = useState(false);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const [now, setNow] = useState(() => Date.now());
   const [lastCheckedAt, setLastCheckedAt] = useState<number | null>(null);
 
@@ -72,20 +72,22 @@ export const SupabaseCustomerPage: React.FC<Props> = ({ client, user }) => {
     if (slotIds.length < 1 || slotIds.length > 3) return;
     setSaving(true);
     setError('');
-    setSuccess('');
     try {
       const action = needsReselection ? 'resubmit_request' : 'submit_request';
       const payload = needsReselection
         ? { p_customer_id: user.id, p_request_id: currentRequest!.id, p_slot_ids: selectedSlots }
         : { p_customer_id: user.id, p_slot_ids: slotIds };
       if (needsReselection) payload.p_slot_ids = slotIds;
-      await writeReservation(client, user.id, action, payload);
+      const result = await writeReservation(client, user.id, action, payload);
+      if (result.requestId) void sendBookingEmail(client, 'submitted', result.requestId);
       setSelectedSlots([]);
       setReviewing(false);
-      setSuccess(needsReselection ? 'Supabase 재선택 저장 완료' : 'Supabase 접수 저장 완료');
       await load();
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : String(reason));
+      const message = reason instanceof Error ? reason.message : String(reason);
+      setError(/404|not found|schema cache|cancel_request/i.test(message)
+        ? '다시 신청 기능이 아직 Supabase에 설치되지 않았습니다. SQL Editor에서 sql/03_cancel_request.sql을 실행한 뒤 다시 시도하세요.'
+        : message);
     } finally {
       setSaving(false);
     }
@@ -111,7 +113,6 @@ export const SupabaseCustomerPage: React.FC<Props> = ({ client, user }) => {
     if (!window.confirm('아직 확정되지 않은 신청을 취소하고 새로 선택할까요?')) return;
     setSaving(true);
     setError('');
-    setSuccess('');
     try {
       await writeReservation(client, user.id, 'cancel_request', {
         p_customer_id: user.id,
@@ -119,7 +120,6 @@ export const SupabaseCustomerPage: React.FC<Props> = ({ client, user }) => {
       });
       setReviewing(false);
       setSelectedSlots([]);
-      setSuccess('기존 신청을 취소했습니다. 새로운 시간을 선택해 주세요.');
       await load();
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : String(reason));
@@ -145,7 +145,6 @@ export const SupabaseCustomerPage: React.FC<Props> = ({ client, user }) => {
 
         <main className="booking-main">
           {error && <div className="alert alert-error">{error}</div>}
-          {success && <div className="alert alert-success">{success}</div>}
           {currentRequest && (
         <section className={`booking-status-card booking-status-${currentRequest.status}`} aria-live="polite">
           <div className="booking-status-heading">

@@ -35,8 +35,7 @@ Supabase 프로젝트의 Connect/API 설정에서 Project URL과 anon 또는 pub
 
 1. `sql/01_install.sql`: 테이블·RPC·권한·42슬롯 설치. 예약과 슬롯을 삭제하지 않으며 이 파일의 재실행은 기존 데이터를 보존합니다.
 2. `sql/02_public_slot_access.sql`: 공개 가용성 조회에 필요한 helper 접근 권한 보완. 예약 데이터나 업무 RPC 권한을 변경하지 않습니다.
-3. `sql/03_cancel_request.sql`: 이미 01 설치를 마친 DB에 미확정 신청 취소 RPC와 권한을 추가합니다. 확정된 신청은 취소하지 않습니다.
-4. `sql/04_admin_reset_fix.sql`: 관리자 초기화 RPC를 교체하고 실제 신청 0건인지 반환값으로 확인합니다.
+3. `sql/03_cancel_request.sql`: 관리자가 확정하지 않은 신청을 취소하고 새로 신청할 수 있는 RPC를 추가합니다.
 
 이미 01 설치를 마친 프로젝트에서 `permission denied for schema private`가 발생하면 **02만** 적용합니다. `sql/00_supabase.sql`은 이전 배포 원본 보존용이므로 실행하지 않습니다. 00으로 설치된 기존 DB에 01을 덧붙이는 방식은 지원하지 않습니다. 운영 DB 변경은 별도 검수 후 진행합니다.
 
@@ -47,6 +46,17 @@ order by id;
 ```
 
 예상 결과는 42행입니다. 공개 슬롯 조회에는 고객 식별 정보가 없습니다. `tests/sql/*.sql`은 격리된 검사 DB 전용이며 실제 Supabase SQL Editor에 넣지 않습니다.
+
+## 이메일 알림 설정
+
+신청 접수·예약 확정 메일은 `supabase/functions/send-booking-email` Edge Function이 Resend를 통해 발송합니다. 예약 저장은 메일 서비스가 잠시 실패해도 성공으로 유지됩니다. 실제 메일 발송을 사용하려면 Supabase CLI로 함수를 배포하고 서버 비밀을 설정하세요.
+
+```sh
+supabase functions deploy send-booking-email
+supabase secrets set RESEND_API_KEY=re_xxx RESEND_FROM_EMAIL=booking@example.com
+```
+
+`RESEND_FROM_EMAIL`은 Resend에서 인증한 발신 도메인의 주소여야 합니다. `SUPABASE_SERVICE_ROLE_KEY`는 Edge Function 내부의 Supabase 비밀값으로만 사용하며 브라우저 환경 변수에 넣지 않습니다.
 
 ## 실제 로그인 및 관리자 지정
 

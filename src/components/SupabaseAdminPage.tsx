@@ -5,6 +5,7 @@ import { readSnapshot, writeReservation, type Snapshot } from '../utils/reservat
 import { isSlotOpen } from '../utils/constants';
 import { getSlaState, getSlaText } from '../utils/sla';
 import { chooseAutoMatch } from '../utils/auto-match';
+import { sendBookingEmail } from '../utils/booking-email';
 
 interface Props { client: SupabaseClient; user: User }
 
@@ -20,16 +21,13 @@ export const SupabaseAdminPage: React.FC<Props> = ({ client, user }) => {
   const [now, setNow] = useState(() => Date.now());
   const [autoMatching, setAutoMatching] = useState(false);
 
-  const load = async (): Promise<Snapshot | null> => {
+  const load = async () => {
     setLoading(true);
     try {
-      const nextSnapshot = await readSnapshot(client, user.id, true);
-      setSnapshot(nextSnapshot);
+      setSnapshot(await readSnapshot(client, user.id, true));
       setError('');
-      return nextSnapshot;
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : String(reason));
-      return null;
     } finally {
       setLoading(false);
     }
@@ -63,15 +61,13 @@ export const SupabaseAdminPage: React.FC<Props> = ({ client, user }) => {
         p_slot_id: selectedSlotId,
         p_admin_id: user.id,
       });
+      void sendBookingEmail(client, 'confirmed', request.id, selectedSlotId);
       setSuccess('Supabase 확정 저장 완료');
       setSelectedRequestId('');
       setSelectedSlotId('');
       await load();
     } catch (reason) {
-      const message = reason instanceof Error ? reason.message : String(reason);
-      setError(/404|not found|schema cache|admin_reset_reservations/i.test(message)
-        ? '초기화 RPC가 Supabase에 설치되지 않았습니다. SQL Editor에서 sql/04_admin_reset_fix.sql을 실행한 뒤 다시 시도하세요.'
-        : message);
+      setError(reason instanceof Error ? reason.message : String(reason));
     } finally {
       setSaving(false);
     }
@@ -86,13 +82,10 @@ export const SupabaseAdminPage: React.FC<Props> = ({ client, user }) => {
       const { data, error: resetError } = await client.rpc('admin_reset_reservations');
       if (resetError) throw resetError;
       if (!data?.success) throw new Error(data?.error || '초기화가 거절되었습니다.');
+      setSuccess('예약 데이터 초기화 완료');
       setSelectedRequestId('');
       setSelectedSlotId('');
-      const refreshed = await load();
-      if (!refreshed || refreshed.requests.length > 0) {
-        throw new Error('초기화 확인 실패: 아직 남아 있는 예약 요청이 있습니다. Supabase의 최신 초기화 SQL을 적용하세요.');
-      }
-      setSuccess('예약 데이터 초기화 완료 (신청 0건)');
+      await load();
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : String(reason));
     } finally {
@@ -206,6 +199,7 @@ export const SupabaseAdminPage: React.FC<Props> = ({ client, user }) => {
       </div>
       <h3>슬롯 현황</h3>
       <SlotTable slots={slots} selectedSlots={[]} onToggle={() => {}} mode="view" />
+      <button className="btn btn-secondary" onClick={() => void load()} disabled={loading}>새로고침</button>
     </div>
   );
 };

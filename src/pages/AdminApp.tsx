@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { SupabaseAdminPage } from '../components/SupabaseAdminPage';
 import { supabase, signOut } from '../utils/supabase';
 import type { User } from '@supabase/supabase-js';
@@ -9,13 +9,6 @@ interface AdminAppProps {
 }
 
 export const AdminApp: React.FC<AdminAppProps> = ({ user, onLogout }) => {
-  const [now, setNow] = useState(() => new Date());
-
-  useEffect(() => {
-    const timer = window.setInterval(() => setNow(new Date()), 1000);
-    return () => window.clearInterval(timer);
-  }, []);
-
   const handleLogout = async () => {
     try {
       await signOut();
@@ -30,10 +23,10 @@ export const AdminApp: React.FC<AdminAppProps> = ({ user, onLogout }) => {
       <div className="header">
         <div>
           <h1>cal.dudu-works.com</h1>
-          <div className="reference-time">
-            기준 시각: {now.toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })} (한국 현재 시각)
-            <br />
-            <span style={{ fontSize: '12px', color: '#666' }}>로그인: {user.email} (관리자)</span>
+          <div className="welcome-message">
+            <strong>{user.user_metadata?.name || user.user_metadata?.full_name || user.email?.split('@')[0] || '관리자'}님 안녕하세요</strong>
+            <span>오늘 하루는 어떠신가요?</span>
+            <span>날씨가 참 좋네요.</span>
           </div>
         </div>
         <div className="role-selector">
