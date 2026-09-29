@@ -54,6 +54,12 @@ export const SupabaseCustomerPage: React.FC<Props> = ({ client, user }) => {
   const currentSlaState = currentRequest
     ? getSlaState(currentRequest.created_at, currentRequest.status, now)
     : null;
+  const currentSeoulTime = new Intl.DateTimeFormat('ko-KR', {
+    timeZone: 'Asia/Seoul',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  }).format(now);
 
   const formatSlot = (slotId: string) => {
     const parsed = parseSlotId(slotId);
@@ -138,7 +144,7 @@ export const SupabaseCustomerPage: React.FC<Props> = ({ client, user }) => {
           <span className="eyebrow">Smart Booking Desk</span>
           <p>원하는 시간을 선택해 주세요.</p>
           <div className="booking-detail"><span aria-hidden="true">◷</span><span>1시간 상담</span></div>
-          <div className="booking-detail"><span aria-hidden="true">◎</span><span>한국 시간 (KST)</span></div>
+          <div className="booking-detail"><span aria-hidden="true">◷</span><span>현재 시각 {currentSeoulTime} (KST)</span></div>
           <p className="booking-account">로그인 계정<br /><strong>{user.email ?? user.id}</strong></p>
         </aside>
 

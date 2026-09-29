@@ -10,6 +10,12 @@ export const GoogleLoginPage: React.FC<GoogleLoginPageProps> = ({ onLoginSuccess
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
   const hasCalledSuccess = useRef(false);
+  const currentSeoulTime = new Intl.DateTimeFormat('ko-KR', {
+    timeZone: 'Asia/Seoul',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  }).format(new Date());
 
   // 페이지 로드 시 현재 사용자 확인
   useEffect(() => {
@@ -62,7 +68,7 @@ export const GoogleLoginPage: React.FC<GoogleLoginPageProps> = ({ onLoginSuccess
             <h1>예약하기</h1>
             <p>원하는 시간을 선택해 주세요.</p>
             <div className="login-detail"><span aria-hidden="true">◷</span>1시간 상담</div>
-            <div className="login-detail"><span aria-hidden="true">◎</span>Asia / Seoul</div>
+            <div className="login-detail"><span aria-hidden="true">◷</span>현재 시각 {currentSeoulTime} (KST)</div>
             <div className="login-intro-footer">로그인 후 예약할 수 있습니다.</div>
           </section>
 
