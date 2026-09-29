@@ -1049,6 +1049,7 @@ body {
 
   .selection-summary {
     max-height: none;
+    margin-top: 0;
   }
 }
 
@@ -1882,5 +1883,6 @@ body {
 
   .selection-summary {
     max-height: 150px;
+    margin-top: 0;
   }
 }
