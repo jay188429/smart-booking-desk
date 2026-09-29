@@ -70,7 +70,7 @@ describe('PRD 예약 시나리오 회귀 검사', () => {
     expect(db.getAllSlots()).toHaveLength(TOTAL_SLOTS);
     vi.setSystemTime(new Date('2026-12-31T18:00:00+09:00'));
     const html = renderToStaticMarkup(createElement(SlotTable, { slots: db.getState().slots, selectedSlots: [], onToggle: () => {}, mode: 'select' }));
-    expect(html.match(/<button[^>]*calendar-day[^>]*disabled=""/g)).toHaveLength(114);
+    expect(html.match(/<button[^>]*calendar-day[^>]*disabled=""/g)).toHaveLength(31);
     expect(html.match(/<button[^>]*time-option[^>]*disabled=""/g)).toHaveLength(3);
   });
 });

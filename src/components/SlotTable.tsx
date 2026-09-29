@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import type { Slot } from '../types';
 import { TIME_SLOTS, getAllDates, isSlotOpen } from '../utils/constants';
 
@@ -18,7 +18,8 @@ export const SlotTable: React.FC<SlotTableProps> = ({
   mode = 'view',
 }) => {
   const dates = getAllDates();
-  const [selectedDate, setSelectedDate] = useState(dates[0]);
+  const firstOpenDate = dates.find(date => TIME_SLOTS.some(item => isSlotOpen(slots[`${date}:${item.label}`]))) || dates[dates.length - 1];
+  const [selectedDate, setSelectedDate] = useState(firstOpenDate);
   const calendarMonths = Array.from(new Set(dates.map(date => date.slice(0, 7)))).map(month => {
     const monthDates = dates.filter(date => date.startsWith(month));
     const firstDay = new Date(`${month}-01T00:00:00+09:00`);
@@ -29,7 +30,25 @@ export const SlotTable: React.FC<SlotTableProps> = ({
       dates: monthDates,
     };
   });
+  const firstOpenMonthIndex = Math.max(0, calendarMonths.findIndex(item => item.month === firstOpenDate.slice(0, 7)));
+  const [currentMonthIndex, setCurrentMonthIndex] = useState(firstOpenMonthIndex);
   const activeDate = dates.includes(selectedDate) ? selectedDate : dates[0];
+
+  useEffect(() => {
+    const selectedDateHasOpenSlot = TIME_SLOTS.some(item => isSlotOpen(slots[`${selectedDate}:${item.label}`]));
+    if (!selectedDateHasOpenSlot && firstOpenDate !== selectedDate) {
+      setSelectedDate(firstOpenDate);
+      setCurrentMonthIndex(firstOpenMonthIndex);
+    }
+  }, [firstOpenDate, firstOpenMonthIndex, selectedDate, slots]);
+
+  const changeMonth = (nextIndex: number) => {
+    const month = calendarMonths[nextIndex];
+    if (!month) return;
+    const monthOpenDate = month.dates.find(date => TIME_SLOTS.some(item => isSlotOpen(slots[`${date}:${item.label}`])));
+    setCurrentMonthIndex(nextIndex);
+    setSelectedDate(monthOpenDate || month.dates[0]);
+  };
 
   const formatDate = (date: string) => {
     const weekday = new Date(`${date}T00:00:00+09:00`).toLocaleDateString('ko-KR', {
@@ -52,8 +71,30 @@ export const SlotTable: React.FC<SlotTableProps> = ({
       </div>
       <div className="calendar-selection-layout">
       <div className="calendar-months" aria-label="2026년 9월부터 12월까지 예약 날짜">
-        {calendarMonths.map(({ month, label, firstWeekday, dates: monthDates }) => <section className="calendar-month" key={month}>
-          <h4>{label}</h4>
+        {(() => {
+          const { month, label, firstWeekday, dates: monthDates } = calendarMonths[currentMonthIndex];
+          return <section className="calendar-month" key={month}>
+          <div className="calendar-month-header">
+            <button
+              className="calendar-nav-button"
+              type="button"
+              onClick={() => changeMonth(currentMonthIndex - 1)}
+              disabled={currentMonthIndex === 0}
+              aria-label="이전 달"
+            >
+              ‹ 이전 달
+            </button>
+            <h4>{label}</h4>
+            <button
+              className="calendar-nav-button"
+              type="button"
+              onClick={() => changeMonth(currentMonthIndex + 1)}
+              disabled={currentMonthIndex === calendarMonths.length - 1}
+              aria-label="다음 달"
+            >
+              다음 달 ›
+            </button>
+          </div>
           <div className="calendar-grid">
             {['일', '월', '화', '수', '목', '금', '토'].map(day => <span className="calendar-weekday" key={day}>{day}</span>)}
             {Array.from({ length: firstWeekday }, (_, index) => <span className="calendar-empty" key={`empty-${month}-${index}`} />)}
@@ -80,7 +121,8 @@ export const SlotTable: React.FC<SlotTableProps> = ({
               );
             })}
           </div>
-        </section>)}
+          </section>;
+        })()}
       </div>
       {mode === 'select' && (
         <aside className="selection-summary" aria-label="선택한 희망 시간">

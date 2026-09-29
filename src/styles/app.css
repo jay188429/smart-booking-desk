@@ -948,15 +948,60 @@ body {
 }
 
 .calendar-months {
+  min-width: 0;
   display: grid;
   grid-template-columns: repeat(2, minmax(280px, 1fr));
   gap: 14px;
+}
+
+.calendar-month {
+  min-width: 0;
+}
+
+.calendar-month-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
 }
 
 .calendar-month h4 {
   margin: 0 0 8px;
   color: #dce9f4;
   font-size: 15px;
+  text-align: center;
+}
+
+.calendar-nav-button {
+  display: inline-flex;
+  place-items: center;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  min-width: 76px;
+  height: 28px;
+  padding: 0 9px;
+  border: 1px solid #46617c;
+  border-radius: 50%;
+  background: #0b1c2e;
+  color: #edf5fb;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.calendar-nav-button:hover:not(:disabled) {
+  border-color: var(--cyan);
+  color: var(--cyan);
+}
+
+.calendar-nav-button:disabled {
+  color: #52677b;
+  cursor: not-allowed;
+  opacity: 0.55;
 }
 
 .calendar-selection-layout {
@@ -1014,7 +1059,7 @@ body {
 }
 
 .calendar-slot-mark.open {
-  background: #2bd477;
+  background: #71879a;
 }
 
 .calendar-slot-mark.closed {
@@ -1023,12 +1068,12 @@ body {
 
 .calendar-slot-mark.chosen {
   height: 5px;
-  background: #ffb39f;
-  box-shadow: 0 0 0 1px rgba(255, 179, 159, 0.2);
+  background: #2bd477;
+  box-shadow: 0 0 0 1px rgba(43, 212, 119, 0.25);
 }
 
 .calendar-day.selected .calendar-slot-mark.open {
-  background: #062b1a;
+  background: #526a7f;
 }
 
 .calendar-day.selected .calendar-slot-mark.chosen {
