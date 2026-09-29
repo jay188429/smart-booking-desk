@@ -59,18 +59,18 @@ export const GoogleLoginPage: React.FC<GoogleLoginPageProps> = ({ onLoginSuccess
           <section className="login-intro">
             <div className="login-avatar" aria-hidden="true">d</div>
             <span className="eyebrow">Smart Booking Desk</span>
-            <h1>예약 상담</h1>
-            <p>가능한 시간을 선택하고 운영자 확인을 거쳐 상담 예약을 완료하세요.</p>
+            <h1>예약하기</h1>
+            <p>원하는 시간을 선택해 주세요.</p>
             <div className="login-detail"><span aria-hidden="true">◷</span>1시간 상담</div>
             <div className="login-detail"><span aria-hidden="true">◎</span>Asia / Seoul</div>
-            <div className="login-intro-footer">간단한 로그인 후 예약 가능한 시간을 확인할 수 있습니다.</div>
+            <div className="login-intro-footer">로그인 후 예약할 수 있습니다.</div>
           </section>
 
           <section className="login-form-panel">
             <div className="login-form-heading">
               <span className="eyebrow">Welcome</span>
-              <h2>로그인하여 예약하기</h2>
-              <p>예약 신청과 확정 상태를 안전하게 확인합니다.</p>
+              <h2>예약하기</h2>
+              <p>로그인 후 예약을 진행하세요.</p>
             </div>
             {error && (
               <div className="alert alert-error login-error">

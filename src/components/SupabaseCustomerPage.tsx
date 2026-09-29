@@ -136,8 +136,8 @@ export const SupabaseCustomerPage: React.FC<Props> = ({ client, user }) => {
         <aside className="booking-sidebar">
           <div className="booking-avatar" aria-hidden="true">S</div>
           <span className="eyebrow">Smart Booking Desk</span>
-          <h2>예약 가능한 시간을 선택해 주세요</h2>
-          <p>희망 시간 1~3개를 선택하면 운영자가 확인 후 예약을 확정합니다.</p>
+          <h2>예약하기</h2>
+          <p>원하는 시간을 선택해 주세요.</p>
           <div className="booking-detail"><span aria-hidden="true">◷</span><span>1시간 상담</span></div>
           <div className="booking-detail"><span aria-hidden="true">◎</span><span>한국 시간 (KST)</span></div>
           <p className="booking-account">로그인 계정<br /><strong>{user.email ?? user.id}</strong></p>
@@ -239,7 +239,7 @@ export const SupabaseCustomerPage: React.FC<Props> = ({ client, user }) => {
         <>
           {!reviewing ? (
             <>
-              <h3>{needsReselection ? '슬롯 재선택' : '슬롯 신청 (1~3개)'}</h3>
+              <h3>{needsReselection ? '다시 예약하기' : '예약하기'}</h3>
               {recommendedSlots.length > 0 && (
                 <div className="recommendation-panel">
                   <h4>추천 대안 슬롯</h4>

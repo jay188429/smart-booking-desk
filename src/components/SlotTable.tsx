@@ -66,7 +66,7 @@ export const SlotTable: React.FC<SlotTableProps> = ({
   return (
     <div className="availability-board" aria-label="예약 가능한 날짜와 시간">
       <div className="availability-heading">
-        <div><span className="eyebrow">2026년 9월–12월</span><h3>가능한 시간</h3></div>
+        <div><h3>예약하기</h3></div>
         {mode === 'select' && <span className="selection-count">{selectedSlots.length}/{maxSelect} 선택</span>}
       </div>
       <div className="calendar-selection-layout">
