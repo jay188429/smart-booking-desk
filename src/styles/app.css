@@ -977,7 +977,7 @@ body {
 .calendar-months {
   min-width: 0;
   display: grid;
-  grid-template-columns: repeat(2, minmax(280px, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: 14px;
 }
 
@@ -1040,7 +1040,15 @@ body {
 
 @media (max-width: 760px) {
   .calendar-months {
-    grid-template-columns: minmax(280px, 1fr);
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .calendar-selection-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .selection-summary {
+    max-height: none;
   }
 }
 
