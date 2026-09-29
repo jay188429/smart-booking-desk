@@ -23,7 +23,7 @@ export const CustomerApp: React.FC<CustomerAppProps> = ({ user, userRole, onLogo
     <div className="container">
       <div className="header">
         <div>
-          <h1>cal.dudu-works.com</h1>
+          <h1>Smart Booking Desk</h1>
           <div className="welcome-message">
             <strong>{user.user_metadata?.name || user.user_metadata?.full_name || user.email?.split('@')[0] || '고객'}님 안녕하세요</strong>
             <span>오늘 하루는 어떠신가요?</span>
@@ -49,7 +49,7 @@ export const CustomerApp: React.FC<CustomerAppProps> = ({ user, userRole, onLogo
 
       <hr style={{ margin: '40px 0', borderColor: '#ddd' }} />
       <div style={{ fontSize: '12px', color: '#666', textAlign: 'center', paddingBottom: '20px' }}>
-        <p>cal.dudu-works.com v1.0 - 고객 화면</p>
+        <p>Smart Booking Desk v1.0 - 고객 화면</p>
         {userRole === 'admin' && (
           <p><a href="/admin">어드민 화면으로 이동</a></p>
         )}

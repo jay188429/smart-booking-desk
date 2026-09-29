@@ -79,7 +79,7 @@ Deno.serve(async request => {
 
   const slotId = body.slotId || requestRow.confirmed_slot_id || '';
   const isConfirmation = body.event === 'confirmed';
-  const subject = isConfirmation ? '[cal.dudu] 예약이 확정되었습니다' : '[cal.dudu] 예약 신청이 접수되었습니다';
+  const subject = isConfirmation ? '[Smart Booking Desk] 예약이 확정되었습니다' : '[Smart Booking Desk] 예약 신청이 접수되었습니다';
   const title = isConfirmation ? '예약이 확정되었습니다' : '예약 신청이 접수되었습니다';
   const message = isConfirmation
     ? `운영자가 예약을 확정했습니다. 확정 시간: ${escapeHtml(slotId)}`
@@ -92,7 +92,7 @@ Deno.serve(async request => {
       from: fromEmail,
       to: [recipient],
       subject,
-      html: `<div style="font-family:Arial,sans-serif;color:#102945"><h2>${title}</h2><p>${message}</p><p>cal.dudu 예약 페이지에서 현재 상태를 확인할 수 있습니다.</p></div>`,
+      html: `<div style="font-family:Arial,sans-serif;color:#102945"><h2>${title}</h2><p>${message}</p><p>Smart Booking Desk 예약 페이지에서 현재 상태를 확인할 수 있습니다.</p></div>`,
     }),
   });
 

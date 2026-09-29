@@ -22,7 +22,7 @@ export const AdminApp: React.FC<AdminAppProps> = ({ user, onLogout }) => {
     <div className="container">
       <div className="header">
         <div>
-          <h1>cal.dudu-works.com</h1>
+          <h1>Smart Booking Desk</h1>
           <div className="welcome-message">
             <strong>{user.user_metadata?.name || user.user_metadata?.full_name || user.email?.split('@')[0] || '관리자'}님 안녕하세요</strong>
             <span>오늘 하루는 어떠신가요?</span>
@@ -48,7 +48,7 @@ export const AdminApp: React.FC<AdminAppProps> = ({ user, onLogout }) => {
 
       <hr style={{ margin: '40px 0', borderColor: '#ddd' }} />
       <div style={{ fontSize: '12px', color: '#666', textAlign: 'center', paddingBottom: '20px' }}>
-        <p>cal.dudu-works.com v1.0 - 관리자 화면</p>
+        <p>Smart Booking Desk v1.0 - 관리자 화면</p>
         <p><a href="/customer">고객 화면으로 이동</a></p>
       </div>
     </div>

@@ -134,8 +134,8 @@ export const SupabaseCustomerPage: React.FC<Props> = ({ client, user }) => {
     <div className="customer-page">
       <div className="booking-shell">
         <aside className="booking-sidebar">
-          <div className="booking-avatar" aria-hidden="true">d</div>
-          <span className="eyebrow">cal.dudu</span>
+          <div className="booking-avatar" aria-hidden="true">S</div>
+          <span className="eyebrow">Smart Booking Desk</span>
           <h2>예약 가능한 시간을 선택해 주세요</h2>
           <p>희망 시간 1~3개를 선택하면 운영자가 확인 후 예약을 확정합니다.</p>
           <div className="booking-detail"><span aria-hidden="true">◷</span><span>30분 상담</span></div>

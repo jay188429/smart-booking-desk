@@ -23,7 +23,7 @@ export const LocalDemoApp: React.FC<Props> = ({ user, onLogout }) => {
     <div className="container">
       <div className="header">
         <div>
-          <h1>cal.dudu-works.com</h1>
+          <h1>Smart Booking Desk</h1>
           <div className="reference-time">로컬 수업용 · {user.email} · C01/C02 시나리오</div>
         </div>
         <div className="role-selector">

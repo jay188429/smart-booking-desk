@@ -54,11 +54,11 @@ export const GoogleLoginPage: React.FC<GoogleLoginPageProps> = ({ onLoginSuccess
   return (
     <div className="login-page">
       <div className="login-panel">
-        <div className="login-panel-bar">◆ <span>Powered by cal.dudu</span></div>
+        <div className="login-panel-bar">◆ <span>Powered by Smart Booking Desk</span></div>
         <div className="login-columns">
           <section className="login-intro">
             <div className="login-avatar" aria-hidden="true">d</div>
-            <span className="eyebrow">cal.dudu</span>
+            <span className="eyebrow">Smart Booking Desk</span>
             <h1>예약 상담</h1>
             <p>가능한 시간을 선택하고 운영자 확인을 거쳐 상담 예약을 완료하세요.</p>
             <div className="login-detail"><span aria-hidden="true">◷</span>30분 상담</div>
@@ -85,7 +85,7 @@ export const GoogleLoginPage: React.FC<GoogleLoginPageProps> = ({ onLoginSuccess
           </section>
         </div>
       </div>
-      <p className="login-footer">cal.dudu-works.com · 예약 관리</p>
+      <p className="login-footer">Smart Booking Desk · 예약 관리</p>
     </div>
   );
 };
