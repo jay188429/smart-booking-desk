@@ -5,6 +5,7 @@ import { isSlotOpen } from '../utils/constants';
 import { getSlaState, getSlaText } from '../utils/sla';
 import { chooseAutoMatch } from '../utils/auto-match';
 import { sendBookingEmail } from '../utils/booking-email';
+import { getBranch } from '../utils/branches';
 
 interface Props { client: SupabaseClient; user: User }
 
@@ -162,6 +163,7 @@ export const SupabaseAdminPage: React.FC<Props> = ({ client, user }) => {
                 onClick={() => { setSelectedRequestId(item.id); setSelectedSlotId(''); }}
               >
                 <strong>#{index + 1} {item.customer_email || item.customer_id}</strong>
+                <span>지점: {getBranch(item.branch_id).name} · {getBranch(item.branch_id).station}</span>
                 <span>버전 {item.version} · {item.status}</span>
                 <span className={getSlaState(item.created_at, item.status, now) === 'expired' ? 'sla-expired' : ''}>
                   {getSlaText(item.created_at, item.status, now)}
@@ -181,6 +183,7 @@ export const SupabaseAdminPage: React.FC<Props> = ({ client, user }) => {
                 <input type="text" value={request.customer_email || request.customer_id} readOnly />
               </div>
               <p>상태: <strong>{request.status}</strong> · 버전 {request.version} · {getSlaText(request.created_at, request.status, now)}</p>
+              <p>예약 지점: <strong>{getBranch(request.branch_id).name}</strong> · {getBranch(request.branch_id).station}</p>
               <h4>희망 슬롯 (우선순위 순)</h4>
               <ul className="list">
                 {candidates.map(candidate => (

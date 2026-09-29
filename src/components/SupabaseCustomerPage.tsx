@@ -6,6 +6,7 @@ import { TIME_SLOTS, parseSlotId } from '../utils/constants';
 import { getSlaState, getSlaText } from '../utils/sla';
 import { recommendAlternativeSlots } from '../utils/recommend';
 import { sendBookingEmail } from '../utils/booking-email';
+import { BRANCHES, getBranch, type BranchId } from '../utils/branches';
 
 interface Props { client: SupabaseClient; user: User }
 
@@ -18,6 +19,7 @@ export const SupabaseCustomerPage: React.FC<Props> = ({ client, user }) => {
   const [error, setError] = useState('');
   const [now, setNow] = useState(() => Date.now());
   const [lastCheckedAt, setLastCheckedAt] = useState<number | null>(null);
+  const [branchId, setBranchId] = useState<BranchId>('kondae');
 
   const load = async () => {
     setLoading(true);
@@ -54,6 +56,11 @@ export const SupabaseCustomerPage: React.FC<Props> = ({ client, user }) => {
   const currentSlaState = currentRequest
     ? getSlaState(currentRequest.created_at, currentRequest.status, now)
     : null;
+  const activeBranchId = currentRequest?.branch_id || branchId;
+
+  useEffect(() => {
+    if (currentRequest?.branch_id) setBranchId(currentRequest.branch_id as BranchId);
+  }, [currentRequest?.branch_id]);
   const currentSeoulTime = new Intl.DateTimeFormat('ko-KR', {
     timeZone: 'Asia/Seoul',
     hour: '2-digit',
@@ -79,10 +86,10 @@ export const SupabaseCustomerPage: React.FC<Props> = ({ client, user }) => {
     setSaving(true);
     setError('');
     try {
-      const action = needsReselection ? 'resubmit_request' : 'submit_request';
+      const action = needsReselection ? 'resubmit_request_at_branch' : 'submit_request_at_branch';
       const payload = needsReselection
-        ? { p_customer_id: user.id, p_request_id: currentRequest!.id, p_slot_ids: selectedSlots }
-        : { p_customer_id: user.id, p_slot_ids: slotIds };
+        ? { p_customer_id: user.id, p_branch_id: activeBranchId, p_request_id: currentRequest!.id, p_slot_ids: selectedSlots }
+        : { p_customer_id: user.id, p_branch_id: activeBranchId, p_slot_ids: slotIds };
       if (needsReselection) payload.p_slot_ids = slotIds;
       const result = await writeReservation(client, user.id, action, payload);
       if (result.requestId) void sendBookingEmail(client, 'submitted', result.requestId);
@@ -150,6 +157,26 @@ export const SupabaseCustomerPage: React.FC<Props> = ({ client, user }) => {
 
         <main className="booking-main">
           {error && <div className="alert alert-error">{error}</div>}
+          <section className="branch-picker" aria-label="예약 지점 선택">
+            <div className="branch-picker-heading">
+              <div><span className="eyebrow">예약 지점</span><h2>{getBranch(activeBranchId).name}</h2></div>
+              <span>{getBranch(activeBranchId).station}</span>
+            </div>
+            <div className="branch-options">
+              {BRANCHES.map(branch => (
+                <button
+                  key={branch.id}
+                  type="button"
+                  className={`branch-option${activeBranchId === branch.id ? ' selected' : ''}`}
+                  onClick={() => setBranchId(branch.id)}
+                  disabled={Boolean(currentRequest) && !needsReselection}
+                >
+                  <strong>{branch.name}</strong><span>{branch.station}</span>
+                </button>
+              ))}
+            </div>
+            <p>세 지점은 동일한 예약 시간표를 사용합니다.</p>
+          </section>
           {currentRequest && (
         <section className={`booking-status-card booking-status-${currentRequest.status}`} aria-live="polite">
           <div className="booking-status-heading">

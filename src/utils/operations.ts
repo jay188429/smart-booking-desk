@@ -15,7 +15,8 @@ export class OperationManager {
   async submitRequest(
     customerId: string,
     selectedSlotIds: string[],
-    operationId: string
+    operationId: string,
+    branchId = 'kondae'
   ): Promise<{
     success: boolean;
     requestId?: string;
@@ -54,7 +55,7 @@ export class OperationManager {
       }
 
       // 요청 생성
-      const request = this.db.createRequest(customerId);
+      const request = this.db.createRequest(customerId, branchId);
       if (!request) {
         logError = 'Failed to create request';
         result = { success: false, error: logError };
@@ -230,7 +231,8 @@ export class OperationManager {
     customerId: string,
     previousRequestId: string,
     newSlotIds: string[],
-    operationId: string
+    operationId: string,
+    branchId = 'kondae'
   ): Promise<{
     success: boolean;
     requestId?: string;
@@ -284,6 +286,7 @@ export class OperationManager {
       this.db.updateRequest(previousRequestId, {
         version: newVersion,
         status: 'received',
+        branchId,
       });
 
       // 새 후보 추가 (같은 requestId 유지)

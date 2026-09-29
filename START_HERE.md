@@ -1,6 +1,6 @@
 # cal.dudu 시작하기
 
-Node.js 22 LTS와 npm을 권장합니다. 예약 기간은 한국 시간 2026-09-09~12-31이며, 오전 9·10·11, 오후 13·14·15·16·17, 저녁 19·20을 선택합니다. 새 시간대 Supabase DB에는 `sql/06_expand_time_slots.sql`을 추가 실행합니다.
+Node.js 22 LTS와 npm을 권장합니다. 예약 기간은 한국 시간 2026-09-09~12-31이며, 오전 9·10·11, 오후 13·14·15·16·17, 저녁 19·20을 선택합니다. 새 시간대 Supabase DB에는 `sql/06_expand_time_slots.sql`을 추가 실행합니다. 세 지점은 동일 시간표를 공유하며 신청에 지점만 매핑하려면 `sql/07_add_branches.sql`도 실행합니다.
 
 ## 실행
 
@@ -36,6 +36,7 @@ Supabase 프로젝트의 Connect/API 설정에서 Project URL과 anon 또는 pub
 1. `sql/01_install.sql`: 테이블·RPC·권한·기본 슬롯 설치. 새 숫자 시간대 예약을 사용하려면 `sql/06_expand_time_slots.sql`을 추가 실행합니다. 예약과 슬롯을 삭제하지 않으며 설치 파일 재실행은 기존 데이터를 보존합니다.
 2. `sql/02_public_slot_access.sql`: 공개 가용성 조회에 필요한 helper 접근 권한 보완. 예약 데이터나 업무 RPC 권한을 변경하지 않습니다.
 3. `sql/03_cancel_request.sql`: 관리자가 확정하지 않은 신청을 취소하고 새로 신청할 수 있는 RPC를 추가합니다.
+4. `sql/07_add_branches.sql`: 건대역지점(건대입구역), 강남지점(신논현역), 을지로지점(을지로입구역)을 추가하고 신청별 지점 매핑 RPC를 설치합니다. 슬롯은 지점 간 공유됩니다.
 
 이미 01 설치를 마친 프로젝트에서 `permission denied for schema private`가 발생하면 **02만** 적용합니다. `sql/00_supabase.sql`은 이전 배포 원본 보존용이므로 실행하지 않습니다. 00으로 설치된 기존 DB에 01을 덧붙이는 방식은 지원하지 않습니다. 운영 DB 변경은 별도 검수 후 진행합니다.
 

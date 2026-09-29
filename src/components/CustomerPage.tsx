@@ -5,6 +5,7 @@ import { OperationManager } from '../utils/operations';
 import { DatabaseManager } from '../utils/database';
 import { decideRequestStatus } from '../utils/decide';
 import { TIME_SLOTS, isSlotOpen } from '../utils/constants';
+import { BRANCHES, getBranch, type BranchId } from '../utils/branches';
 import { getSlaState, getSlaText } from '../utils/sla';
 import { recommendAlternativeSlots } from '../utils/recommend';
 
@@ -25,6 +26,7 @@ export const CustomerPage: React.FC<CustomerPageProps> = ({ db }) => {
   const [success, setSuccess] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [now, setNow] = useState(() => Date.now());
+  const [branchId, setBranchId] = useState<BranchId>('kondae');
 
   const om = new OperationManager(db);
 
@@ -99,7 +101,7 @@ export const CustomerPage: React.FC<CustomerPageProps> = ({ db }) => {
 
     try {
       const operationId = `submit-${customerId}-${Date.now()}`;
-      const result = await om.submitRequest(customerId, selectedSlots, operationId);
+      const result = await om.submitRequest(customerId, selectedSlots, operationId, branchId);
 
       if (result.success) {
         setSuccess('신청이 완료되었습니다!');
@@ -133,7 +135,8 @@ export const CustomerPage: React.FC<CustomerPageProps> = ({ db }) => {
         customerId,
         latest.request.id,
         slotIds,
-        operationId
+        operationId,
+        branchId
       );
 
       if (result.success) {
@@ -201,6 +204,20 @@ export const CustomerPage: React.FC<CustomerPageProps> = ({ db }) => {
         <div>
           <h3>예약하기</h3>
           <p className="booking-instruction">희망 시간대를 우선순위 순서대로 선택해 주세요.</p>
+          <div className="branch-picker" aria-label="예약 지점 선택">
+            <div className="branch-picker-heading">
+              <div><span className="eyebrow">예약 지점</span><h2>{getBranch(branchId).name}</h2></div>
+              <span>{getBranch(branchId).station}</span>
+            </div>
+            <div className="branch-options">
+              {BRANCHES.map(branch => (
+                <button key={branch.id} type="button" className={`branch-option${branchId === branch.id ? ' selected' : ''}`} onClick={() => setBranchId(branch.id)}>
+                  <strong>{branch.name}</strong><span>{branch.station}</span>
+                </button>
+              ))}
+            </div>
+            <p>세 지점은 동일한 예약 시간표를 사용합니다.</p>
+          </div>
           <SlotTable
             slots={slots}
             selectedSlots={selectedSlots}

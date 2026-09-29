@@ -935,6 +935,73 @@ body {
   margin-bottom: 16px;
 }
 
+.branch-picker {
+  margin-bottom: 24px;
+  padding: 16px;
+  border: 1px solid rgba(184, 201, 216, 0.2);
+  border-radius: 8px;
+  background: rgba(11, 28, 46, 0.72);
+}
+
+.branch-picker-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.branch-picker-heading h2 {
+  margin: 4px 0 0;
+  color: #fff;
+  font-size: 18px;
+}
+
+.branch-picker-heading > span {
+  color: var(--cyan);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.branch-options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.branch-option {
+  display: grid;
+  gap: 4px;
+  padding: 10px 12px;
+  border: 1px solid rgba(184, 201, 216, 0.24);
+  border-radius: 6px;
+  background: transparent;
+  color: #dce9f4;
+  text-align: left;
+  cursor: pointer;
+}
+
+.branch-option span {
+  color: #8ea1b2;
+  font-size: 11px;
+}
+
+.branch-option.selected {
+  border-color: var(--cyan);
+  background: rgba(109, 224, 208, 0.1);
+}
+
+.branch-option:disabled {
+  cursor: default;
+  opacity: 0.82;
+}
+
+.branch-picker > p {
+  margin: 10px 0 0;
+  color: #8ea1b2;
+  font-size: 11px;
+}
+
 .availability-board {
   margin: 30px 0 26px;
 }

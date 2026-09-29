@@ -34,6 +34,14 @@ describe('OperationManager', () => {
       expect(candidates[1].priority).toBe(2);
     });
 
+    it('should map a request to a shared-schedule branch', async () => {
+      const result = await om.submitRequest('C02', ['2026-09-09:09'], 'op-branch', 'gangnam');
+      const request = db.getRequest(result.requestId!);
+
+      expect(result.success).toBe(true);
+      expect(request?.branchId).toBe('gangnam');
+    });
+
     it('should reject submission with 0 slots', async () => {
       const result = await om.submitRequest('C01', [], 'op-1');
 

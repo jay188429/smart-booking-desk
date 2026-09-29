@@ -13,6 +13,7 @@ export interface Slot {
 export interface Request {
   id: string; // UUID
   customerId: string; // "C01" 등
+  branchId?: string; // 지점 매핑 (모든 지점이 동일 슬롯 공유)
   version: number; // 재선택 시 증가
   createdAt: string; // ISO 8601
   status: 'received' | 'needs_reselection' | 'confirmed';
