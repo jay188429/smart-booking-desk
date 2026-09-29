@@ -1898,18 +1898,38 @@ body {
     grid-template-columns: 1fr;
     width: 100%;
     min-width: 0;
-    overflow-x: hidden;
+    overflow-x: visible;
   }
 
-  .calendar-months,
-  .calendar-month,
-  .calendar-grid {
+  .calendar-months {
     width: 100%;
     min-width: 0;
+    overflow-x: auto;
+    padding-bottom: 5px;
+    scrollbar-color: #46617c #0b1c2e;
+    scrollbar-width: thin;
+  }
+
+  .calendar-months::-webkit-scrollbar {
+    height: 5px;
+  }
+
+  .calendar-months::-webkit-scrollbar-track {
+    background: #0b1c2e;
+  }
+
+  .calendar-months::-webkit-scrollbar-thumb {
+    border-radius: 5px;
+    background: #46617c;
+  }
+
+  .calendar-month {
+    width: 100%;
+    min-width: 460px;
   }
 
   .calendar-grid {
-    grid-template-columns: repeat(7, minmax(0, 1fr));
+    grid-template-columns: repeat(7, minmax(42px, 1fr));
     gap: 2px;
     padding: 10px 6px;
   }
