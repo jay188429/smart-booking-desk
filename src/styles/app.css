@@ -1086,6 +1086,7 @@ body {
 .calendar-day {
   justify-self: stretch;
   margin: 0;
+  min-width: 0;
 }
 
 .calendar-slot-marks {
@@ -1094,6 +1095,11 @@ body {
   gap: 2px;
   width: 26px;
   margin-top: 3px;
+}
+
+.calendar-slot-marks {
+  margin-right: auto;
+  margin-left: auto;
 }
 
 .calendar-slot-mark {
