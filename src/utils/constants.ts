@@ -4,16 +4,16 @@ export const END_DATE = new Date('2026-12-31T23:59:59+09:00');
 
 // 예약 시간 (KST 기준). 달력에서는 오전·오후·저녁 3개 구역으로 묶어 표시합니다.
 export const TIME_SLOTS = [
-  { label: '09', hour: 9, period: 'am', displayLabel: '9' },
-  { label: '10', hour: 10, period: 'am', displayLabel: '10' },
-  { label: '11', hour: 11, period: 'am', displayLabel: '11' },
-  { label: '13', hour: 13, period: 'pm', displayLabel: '13' },
-  { label: '14', hour: 14, period: 'pm', displayLabel: '14' },
-  { label: '15', hour: 15, period: 'pm', displayLabel: '15' },
-  { label: '16', hour: 16, period: 'pm', displayLabel: '16' },
-  { label: '17', hour: 17, period: 'pm', displayLabel: '17' },
-  { label: '19', hour: 19, period: 'evening', displayLabel: '19' },
-  { label: '20', hour: 20, period: 'evening', displayLabel: '20' },
+  { label: '09', hour: 9, period: 'am', displayLabel: '09:00' },
+  { label: '10', hour: 10, period: 'am', displayLabel: '10:00' },
+  { label: '11', hour: 11, period: 'am', displayLabel: '11:00' },
+  { label: '13', hour: 13, period: 'pm', displayLabel: '13:00' },
+  { label: '14', hour: 14, period: 'pm', displayLabel: '14:00' },
+  { label: '15', hour: 15, period: 'pm', displayLabel: '15:00' },
+  { label: '16', hour: 16, period: 'pm', displayLabel: '16:00' },
+  { label: '17', hour: 17, period: 'pm', displayLabel: '17:00' },
+  { label: '19', hour: 19, period: 'evening', displayLabel: '19:00' },
+  { label: '20', hour: 20, period: 'evening', displayLabel: '20:00' },
 ];
 
 export const TIME_GROUPS = [

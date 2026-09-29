@@ -22,9 +22,27 @@ function queryError(label: string, error: { message: string } | null) {
   if (error) throw new Error(`${label}: ${error.message}`);
 }
 export async function readSnapshot(client: SupabaseClient, userId: string, admin: boolean): Promise<Snapshot> {
-  const slotResult = await client.from('slot_availability').select('id,date,time_label,status,available').returns<SlotRow[]>();
-  queryError('슬롯 조회 실패', slotResult.error);
-  const currentTimeSlots = slotResult.data?.filter(s => TIME_SLOTS.some(time => time.label === s.time_label)) || [];
+  const slotLabels = TIME_SLOTS.map(time => time.label);
+  const firstSlotResult = await client
+    .from('slot_availability')
+    .select('id,date,time_label,status,available')
+    .in('time_label', slotLabels)
+    .order('id', { ascending: true })
+    .range(0, 999)
+    .returns<SlotRow[]>();
+  queryError('슬롯 조회 실패', firstSlotResult.error);
+  const currentTimeSlots = [...(firstSlotResult.data || [])];
+  if (currentTimeSlots.length === 1000) {
+    const remainingSlotResult = await client
+      .from('slot_availability')
+      .select('id,date,time_label,status,available')
+      .in('time_label', slotLabels)
+      .order('id', { ascending: true })
+      .range(1000, 1999)
+      .returns<SlotRow[]>();
+    queryError('슬롯 조회 실패', remainingSlotResult.error);
+    currentTimeSlots.push(...(remainingSlotResult.data || []));
+  }
   if (currentTimeSlots.length !== TOTAL_SLOTS || currentTimeSlots.some(s => typeof s.available !== 'boolean')) throw new Error(`슬롯 설치 결과가 올바르지 않습니다. ${TOTAL_SLOTS}슬롯과 가용성 조회를 확인하세요.`);
   const slots = Object.fromEntries(currentTimeSlots.map(s => [s.id, { id: s.id, date: s.date, timeLabel: s.time_label, status: s.status, serverAvailable: s.available }])) as Record<string, Slot>;
   let requestResult;
