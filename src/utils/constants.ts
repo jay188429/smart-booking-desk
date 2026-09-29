@@ -1,6 +1,6 @@
-// 날짜 범위 (양끝 포함, 9/9~9/22)
+// 날짜 범위 (양끝 포함, 2026-09-09~2026-12-31, 한국 날짜)
 export const START_DATE = new Date('2026-09-09T00:00:00+09:00');
-export const END_DATE = new Date('2026-09-22T23:59:59+09:00');
+export const END_DATE = new Date('2026-12-31T23:59:59+09:00');
 
 // 시간대 (KST 기준)
 export const TIME_SLOTS = [
@@ -16,7 +16,7 @@ export function calculateTotalSlots(): number {
   return diffDays * TIME_SLOTS.length;
 }
 
-export const TOTAL_SLOTS = 42; // 14일 × 3시간대
+export const TOTAL_SLOTS = calculateTotalSlots(); // 114일 × 3시간대 = 342슬롯
 
 // 슬롯 ID 생성
 export function generateSlotId(dateStr: string, timeLabel: string): string {
@@ -33,10 +33,15 @@ export function parseSlotId(slotId: string): { date: string; timeLabel: string }
 // 모든 날짜 배열 생성 (KST 기준)
 export function getAllDates(): string[] {
   const dates: string[] = [];
-  for (let day = 9; day <= 22; day += 1) {
-    dates.push(`2026-09-${String(day).padStart(2, '0')}`);
+  const kstOffset = 9 * 60 * 60 * 1000;
+  const startKst = new Date(START_DATE.getTime() + kstOffset);
+  const endKst = new Date(END_DATE.getTime() + kstOffset);
+  const cursor = new Date(Date.UTC(startKst.getUTCFullYear(), startKst.getUTCMonth(), startKst.getUTCDate()));
+  const end = Date.UTC(endKst.getUTCFullYear(), endKst.getUTCMonth(), endKst.getUTCDate());
+  while (cursor.getTime() <= end) {
+    dates.push(`${cursor.getUTCFullYear()}-${String(cursor.getUTCMonth() + 1).padStart(2, '0')}-${String(cursor.getUTCDate()).padStart(2, '0')}`);
+    cursor.setUTCDate(cursor.getUTCDate() + 1);
   }
-
   return dates;
 }
 

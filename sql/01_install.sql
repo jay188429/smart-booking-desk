@@ -4,7 +4,7 @@ CREATE SCHEMA IF NOT EXISTS private;
 REVOKE ALL ON SCHEMA private FROM PUBLIC;
 GRANT USAGE ON SCHEMA private TO authenticated;
 -- Supabase PostgreSQL 용
--- 한국 시간 2026-09-09~2026-09-22 14일, 매일 오전·오후·저녁 42슬롯
+-- 한국 시간 2026-09-09~2026-12-31 114일, 매일 오전·오후·저녁 342슬롯
 
 
 CREATE OR REPLACE FUNCTION private.reservation_now() RETURNS timestamptz
@@ -18,7 +18,7 @@ LANGUAGE sql STABLE SET search_path = '' AS $$
 $$;
 REVOKE ALL ON FUNCTION private.slot_open(text,text,text) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION private.slot_open(text,text,text) TO authenticated, anon;
--- 1. 슬롯 테이블 (42개 고정)
+-- 1. 슬롯 테이블 (342개 고정)
 CREATE TABLE IF NOT EXISTS slots (
   id TEXT PRIMARY KEY,
   date TEXT NOT NULL,
@@ -514,7 +514,7 @@ $$;
 -- ====================================================
 
 -- ====================================================
--- 10. 슬롯 데이터 (42개, ON CONFLICT DO NOTHING)
+-- 10. 슬롯 데이터 (342개, ON CONFLICT DO NOTHING)
 -- ====================================================
 
 INSERT INTO public.slots (id, date, time_label, status)
@@ -561,6 +561,15 @@ VALUES
   ('2026-09-22:am', '2026-09-22', 'am', 'available'),
   ('2026-09-22:pm', '2026-09-22', 'pm', 'available'),
   ('2026-09-22:evening', '2026-09-22', 'evening', 'available')
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO public.slots (id, date, time_label, status)
+SELECT to_char(slot_date, 'YYYY-MM-DD') || ':' || time_label,
+       to_char(slot_date, 'YYYY-MM-DD'),
+       time_label,
+       'available'
+FROM generate_series(DATE '2026-09-23', DATE '2026-12-31', INTERVAL '1 day') AS dates(slot_date)
+CROSS JOIN (VALUES ('am'), ('pm'), ('evening')) AS times(time_label)
 ON CONFLICT (id) DO NOTHING;
 
 CREATE OR REPLACE FUNCTION public.submit_request(p_customer_id text, p_slot_ids text[], p_operation_id text) RETURNS jsonb

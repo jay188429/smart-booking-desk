@@ -9,7 +9,7 @@ DECLARE
  c03 text := '00000000-0000-4000-8000-000000000003';
  a uuid; b uuid; c uuid; result jsonb;
 BEGIN
- ASSERT (SELECT count(*) = 42 FROM public.slots), '42 slots';
+ASSERT (SELECT count(*) = 342 FROM public.slots), '342 slots';
  PERFORM set_config('request.jwt.claim.sub', c01, true);
  PERFORM set_config('request.jwt.claims', jsonb_build_object('sub', c01)::text, true);
  result := public.submit_request(c01, ARRAY['2026-09-09:am','2026-09-09:pm'], 's1');
@@ -69,7 +69,7 @@ BEGIN
  RAISE NOTICE 'PASS: Korea start boundary';
 END $$;
 SET LOCAL ROLE anon;
-DO $$ BEGIN ASSERT (SELECT count(*) FILTER (WHERE available IS NOT NULL) = 42 FROM public.slot_availability), 'public availability fields accessible'; END $$;
+DO $$ BEGIN ASSERT (SELECT count(*) FILTER (WHERE available IS NOT NULL) = 342 FROM public.slot_availability), 'public availability fields accessible'; END $$;
 ROLLBACK;
 
 -- 로컬 회귀 검사와 같은 9/9 09:00 KST 경계. 실제 authenticated 역할로 RPC 호출.

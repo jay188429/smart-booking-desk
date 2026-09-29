@@ -1,13 +1,13 @@
 import { describe, expect, it, vi } from 'vitest';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import { isSlotOpen } from '../src/utils/constants';
+import { getAllDates, isSlotOpen } from '../src/utils/constants';
 import { makeClient, readSnapshot, writeReservation } from '../src/utils/reservation-api';
 
 function memoryStorage() {
   const values = new Map<string, string>();
   return { getItem: (key: string) => values.get(key) ?? null, setItem: (key: string, value: string) => { values.set(key, value); }, removeItem: (key: string) => { values.delete(key); } };
 }
-const slotRows = Array.from({length: 14}, (_, i) => ['am','pm','evening'].map(time => ({ id: `2026-09-${String(i+9).padStart(2,'0')}:${time}`, date: `2026-09-${String(i+9).padStart(2,'0')}`, time_label: time, status: 'available', available: true }))).flat();
+const slotRows = getAllDates().flatMap(date => ['am', 'pm', 'evening'].map(time => ({ id: `${date}:${time}`, date, time_label: time, status: 'available', available: true })));
 
 describe('Supabase 연결 계약', () => {
   it('설정 누락과 서버 비밀 키를 거절하며 로컬 성공으로 바꾸지 않는다', () => {

@@ -19,8 +19,16 @@ export const SlotTable: React.FC<SlotTableProps> = ({
 }) => {
   const dates = getAllDates();
   const [selectedDate, setSelectedDate] = useState(dates[0]);
-  const calendarDays = Array.from({ length: 30 }, (_, index) => `2026-09-${String(index + 1).padStart(2, '0')}`);
-  const firstWeekday = new Date('2026-09-01T00:00:00+09:00').getDay();
+  const calendarMonths = Array.from(new Set(dates.map(date => date.slice(0, 7)))).map(month => {
+    const monthDates = dates.filter(date => date.startsWith(month));
+    const firstDay = new Date(`${month}-01T00:00:00+09:00`);
+    return {
+      month,
+      label: firstDay.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', timeZone: 'Asia/Seoul' }),
+      firstWeekday: firstDay.getDay(),
+      dates: monthDates,
+    };
+  });
   const activeDate = dates.includes(selectedDate) ? selectedDate : dates[0];
 
   const formatDate = (date: string) => {
@@ -39,36 +47,40 @@ export const SlotTable: React.FC<SlotTableProps> = ({
   return (
     <div className="availability-board" aria-label="예약 가능한 날짜와 시간">
       <div className="availability-heading">
-        <div><span className="eyebrow">September 2026</span><h3>가능한 시간</h3></div>
+        <div><span className="eyebrow">2026년 9월–12월</span><h3>가능한 시간</h3></div>
         {mode === 'select' && <span className="selection-count">{selectedSlots.length}/{maxSelect} 선택</span>}
       </div>
       <div className="calendar-selection-layout">
-      <div className="calendar-grid" aria-label="2026년 9월 예약 날짜">
-        {['일', '월', '화', '수', '목', '금', '토'].map(day => <span className="calendar-weekday" key={day}>{day}</span>)}
-        {Array.from({ length: firstWeekday }, (_, index) => <span className="calendar-empty" key={`empty-${index}`} />)}
-        {calendarDays.map(date => {
-          const isBookable = dates.includes(date);
-          const hasOpenSlot = TIME_SLOTS.some(item => isSlotOpen(slots[`${date}:${item.label}`]));
-          const isSelected = activeDate === date;
-          return (
-            <button
-              className={`calendar-day${isSelected ? ' selected' : ''}${isBookable && hasOpenSlot ? ' available' : ''}`}
-              key={date}
-              type="button"
-              onClick={() => { if (isBookable) setSelectedDate(date); }}
-              disabled={!isBookable || !hasOpenSlot}
-              aria-pressed={isSelected}
-            >
-              <span>{Number(date.slice(-2))}</span>
-              {isBookable && <span className="calendar-slot-marks">{TIME_SLOTS.map(item => {
-                const slotId = `${date}:${item.label}`;
-                const open = isSlotOpen(slots[slotId]);
-                const chosen = selectedSlots.includes(slotId);
-                return <span className={`calendar-slot-mark ${open ? 'open' : 'closed'}${chosen ? ' chosen' : ''}`} key={slotId} />;
-              })}</span>}
-            </button>
-          );
-        })}
+      <div className="calendar-months" aria-label="2026년 9월부터 12월까지 예약 날짜">
+        {calendarMonths.map(({ month, label, firstWeekday, dates: monthDates }) => <section className="calendar-month" key={month}>
+          <h4>{label}</h4>
+          <div className="calendar-grid">
+            {['일', '월', '화', '수', '목', '금', '토'].map(day => <span className="calendar-weekday" key={day}>{day}</span>)}
+            {Array.from({ length: firstWeekday }, (_, index) => <span className="calendar-empty" key={`empty-${month}-${index}`} />)}
+            {monthDates.map(date => {
+              const hasOpenSlot = TIME_SLOTS.some(item => isSlotOpen(slots[`${date}:${item.label}`]));
+              const isSelected = activeDate === date;
+              return (
+                <button
+                  className={`calendar-day${isSelected ? ' selected' : ''}${hasOpenSlot ? ' available' : ''}`}
+                  key={date}
+                  type="button"
+                  onClick={() => setSelectedDate(date)}
+                  disabled={!hasOpenSlot}
+                  aria-pressed={isSelected}
+                >
+                  <span>{Number(date.slice(-2))}</span>
+                  <span className="calendar-slot-marks">{TIME_SLOTS.map(item => {
+                    const slotId = `${date}:${item.label}`;
+                    const open = isSlotOpen(slots[slotId]);
+                    const chosen = selectedSlots.includes(slotId);
+                    return <span className={`calendar-slot-mark ${open ? 'open' : 'closed'}${chosen ? ' chosen' : ''}`} key={slotId} />;
+                  })}</span>
+                </button>
+              );
+            })}
+          </div>
+        </section>)}
       </div>
       {mode === 'select' && (
         <aside className="selection-summary" aria-label="선택한 희망 시간">
