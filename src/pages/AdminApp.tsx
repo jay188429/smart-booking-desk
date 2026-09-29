@@ -41,10 +41,6 @@ export const AdminApp: React.FC<AdminAppProps> = ({ user, onLogout }) => {
         </div>
       </div>
 
-      <div className="alert alert-warning">
-        <strong>관리자 화면:</strong> 신청 확인, 수동 확정, 실행 기록
-      </div>
-
       <SupabaseAdminPage client={supabase} user={user} />
 
       <hr style={{ margin: '40px 0', borderColor: '#ddd' }} />
