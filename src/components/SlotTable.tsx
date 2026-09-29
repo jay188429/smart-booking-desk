@@ -134,7 +134,7 @@ export const SlotTable: React.FC<SlotTableProps> = ({
       )}
       </div>
       <section className="availability-day selected-day">
-        <div className="selected-day-heading"><h4>{formatDate(activeDate)}</h4><span>예약 가능 시간 {TIME_SLOTS.filter(item => isSlotOpen(slots[`${activeDate}:${item.label}`])).length}개</span></div>
+        <div className="selected-day-heading"><h4>{formatDate(activeDate)}</h4><span>{TIME_SLOTS.filter(item => isSlotOpen(slots[`${activeDate}:${item.label}`])).length}개 중 {maxSelect}개 선택 가능</span></div>
         <div className="time-groups">
           {TIME_GROUPS.map(group => (
             <div className="time-group" key={group.period}>
