@@ -239,6 +239,7 @@ export const SupabaseCustomerPage: React.FC<Props> = ({ client, user }) => {
           {!reviewing ? (
             <>
               <h3>{needsReselection ? '다시 예약하기' : '예약하기'}</h3>
+              <p className="booking-instruction">희망 시간대를 우선순위 순서대로 선택해 주세요.</p>
               {recommendedSlots.length > 0 && (
                 <div className="recommendation-panel">
                   <h4>추천 대안 슬롯</h4>

@@ -200,9 +200,7 @@ export const CustomerPage: React.FC<CustomerPageProps> = ({ db }) => {
       {stage === 'select' && (
         <div>
           <h3>예약하기</h3>
-          <p style={{ color: '#666', fontSize: '14px' }}>
-            원하는 시간을 선택해 주세요.
-          </p>
+          <p className="booking-instruction">희망 시간대를 우선순위 순서대로 선택해 주세요.</p>
           <SlotTable
             slots={slots}
             selectedSlots={selectedSlots}
