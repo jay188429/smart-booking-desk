@@ -1,6 +1,6 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type { Slot } from '../types';
-import { TOTAL_SLOTS } from './constants';
+import { TIME_SLOTS, TOTAL_SLOTS } from './constants';
 export interface Booking { id: string; customer_id: string; customer_email?: string | null; version: number; created_at: string; updated_at: string; confirmed_at: string | null; status: 'received' | 'needs_reselection' | 'confirmed'; confirmed_slot_id: string | null }
 export interface Wish { id: string; request_id: string; slot_id: string; priority: number; version: number; queue_seq: number }
 export interface Audit { id: string; operation_id: string; action: string; request_id: string | null; status: string; error_message: string | null }
@@ -24,8 +24,9 @@ function queryError(label: string, error: { message: string } | null) {
 export async function readSnapshot(client: SupabaseClient, userId: string, admin: boolean): Promise<Snapshot> {
   const slotResult = await client.from('slot_availability').select('id,date,time_label,status,available').returns<SlotRow[]>();
   queryError('슬롯 조회 실패', slotResult.error);
-  if (!slotResult.data || slotResult.data.length !== TOTAL_SLOTS || slotResult.data.some(s => typeof s.available !== 'boolean')) throw new Error(`슬롯 설치 결과가 올바르지 않습니다. ${TOTAL_SLOTS}슬롯과 가용성 조회를 확인하세요.`);
-  const slots = Object.fromEntries(slotResult.data.map(s => [s.id, { id: s.id, date: s.date, timeLabel: s.time_label, status: s.status, serverAvailable: s.available }])) as Record<string, Slot>;
+  const currentTimeSlots = slotResult.data?.filter(s => TIME_SLOTS.some(time => time.label === s.time_label)) || [];
+  if (currentTimeSlots.length !== TOTAL_SLOTS || currentTimeSlots.some(s => typeof s.available !== 'boolean')) throw new Error(`슬롯 설치 결과가 올바르지 않습니다. ${TOTAL_SLOTS}슬롯과 가용성 조회를 확인하세요.`);
+  const slots = Object.fromEntries(currentTimeSlots.map(s => [s.id, { id: s.id, date: s.date, timeLabel: s.time_label, status: s.status, serverAvailable: s.available }])) as Record<string, Slot>;
   let requestResult;
   if (admin) {
     const overviewResult = await client.rpc('admin_request_overview').returns<Booking[]>();

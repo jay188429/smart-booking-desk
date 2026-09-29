@@ -1261,13 +1261,30 @@ body {
   gap: 10px;
 }
 
+.time-groups {
+  display: grid;
+  gap: 14px;
+}
+
+.time-group {
+  display: grid;
+  gap: 8px;
+}
+
+.time-group h5 {
+  margin: 0;
+  color: #a8bac9;
+  font-size: 12px;
+  font-weight: 700;
+}
+
 .time-option {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 130px;
+  min-width: 54px;
   min-height: 42px;
-  padding: 9px 14px;
+  padding: 9px 12px;
   border: 1px solid #2bd477;
   border-radius: 22px;
   background: transparent;

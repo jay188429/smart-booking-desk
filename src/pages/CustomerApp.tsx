@@ -42,17 +42,13 @@ export const CustomerApp: React.FC<CustomerAppProps> = ({ user, userRole, onLogo
         </div>
       </div>
 
-      <div className="alert alert-info">
-        <strong>고객 화면:</strong> 예약 신청, 상태 확인, 재선택
-      </div>
-
       <SupabaseCustomerPage client={supabase} user={user} />
 
       <hr style={{ margin: '40px 0', borderColor: '#ddd' }} />
       <div style={{ fontSize: '12px', color: '#666', textAlign: 'center', paddingBottom: '20px' }}>
         <p>Smart Booking Desk v1.0 - 고객 화면</p>
         {userRole === 'admin' && (
-          <p><a href="/admin">어드민 화면으로 이동</a></p>
+          <p><a href="/admin">Admin</a></p>
         )}
       </div>
     </div>

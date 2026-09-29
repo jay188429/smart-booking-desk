@@ -1,8 +1,8 @@
-// 슬롯: 342개 고정 (2026-09-09~2026-12-31, 114일 × 3시간대)
+// 슬롯: 1140개 (2026-09-09~2026-12-31, 114일 × 10시간)
 export interface Slot {
   id: string; // "2026-09-07:am" 형식
   date: string; // "2026-09-07"
-  timeLabel: string; // "am", "pm", "evening"
+  timeLabel: string; // "09", "10", ... "20"
   status: 'available' | 'confirmed'; // confirmed면 마감
   confirmedAt?: string; // ISO 8601
   confirmedBy?: string; // 고객 코드

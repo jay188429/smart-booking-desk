@@ -2,12 +2,25 @@
 export const START_DATE = new Date('2026-09-09T00:00:00+09:00');
 export const END_DATE = new Date('2026-12-31T23:59:59+09:00');
 
-// 시간대 (KST 기준)
+// 예약 시간 (KST 기준). 달력에서는 오전·오후·저녁 3개 구역으로 묶어 표시합니다.
 export const TIME_SLOTS = [
-  { label: 'am', hour: 9, displayLabel: '오전 09:00' },
-  { label: 'pm', hour: 13, displayLabel: '오후 13:00' },
-  { label: 'evening', hour: 18, displayLabel: '저녁 18:00' },
+  { label: '09', hour: 9, period: 'am', displayLabel: '9' },
+  { label: '10', hour: 10, period: 'am', displayLabel: '10' },
+  { label: '11', hour: 11, period: 'am', displayLabel: '11' },
+  { label: '13', hour: 13, period: 'pm', displayLabel: '13' },
+  { label: '14', hour: 14, period: 'pm', displayLabel: '14' },
+  { label: '15', hour: 15, period: 'pm', displayLabel: '15' },
+  { label: '16', hour: 16, period: 'pm', displayLabel: '16' },
+  { label: '17', hour: 17, period: 'pm', displayLabel: '17' },
+  { label: '19', hour: 19, period: 'evening', displayLabel: '19' },
+  { label: '20', hour: 20, period: 'evening', displayLabel: '20' },
 ];
+
+export const TIME_GROUPS = [
+  { label: '오전', period: 'am' },
+  { label: '오후', period: 'pm' },
+  { label: '저녁', period: 'evening' },
+] as const;
 
 // 총 슬롯 수 계산
 export function calculateTotalSlots(): number {
@@ -16,7 +29,7 @@ export function calculateTotalSlots(): number {
   return diffDays * TIME_SLOTS.length;
 }
 
-export const TOTAL_SLOTS = calculateTotalSlots(); // 114일 × 3시간대 = 342슬롯
+export const TOTAL_SLOTS = calculateTotalSlots(); // 114일 × 10개 시간 = 1140슬롯
 
 // 슬롯 ID 생성
 export function generateSlotId(dateStr: string, timeLabel: string): string {

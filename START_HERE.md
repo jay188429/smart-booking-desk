@@ -1,6 +1,6 @@
 # cal.dudu 시작하기
 
-Node.js 22 LTS와 npm을 권장합니다. 예약 기간은 한국 시간 2026-09-09~12-31, 오전 09:00·오후 13:00·저녁 18:00, 총 342슬롯입니다.
+Node.js 22 LTS와 npm을 권장합니다. 예약 기간은 한국 시간 2026-09-09~12-31이며, 오전 9·10·11, 오후 13·14·15·16·17, 저녁 19·20을 선택합니다. 새 시간대 Supabase DB에는 `sql/06_expand_time_slots.sql`을 추가 실행합니다.
 
 ## 실행
 
@@ -33,7 +33,7 @@ Supabase 프로젝트의 Connect/API 설정에서 Project URL과 anon 또는 pub
 
 새 실습용 Supabase 프로젝트의 SQL Editor에서 다음 순서로 실행합니다.
 
-1. `sql/01_install.sql`: 테이블·RPC·권한·342슬롯 설치. 예약과 슬롯을 삭제하지 않으며 이 파일의 재실행은 기존 데이터를 보존합니다.
+1. `sql/01_install.sql`: 테이블·RPC·권한·기본 슬롯 설치. 새 숫자 시간대 예약을 사용하려면 `sql/06_expand_time_slots.sql`을 추가 실행합니다. 예약과 슬롯을 삭제하지 않으며 설치 파일 재실행은 기존 데이터를 보존합니다.
 2. `sql/02_public_slot_access.sql`: 공개 가용성 조회에 필요한 helper 접근 권한 보완. 예약 데이터나 업무 RPC 권한을 변경하지 않습니다.
 3. `sql/03_cancel_request.sql`: 관리자가 확정하지 않은 신청을 취소하고 새로 신청할 수 있는 RPC를 추가합니다.
 
@@ -45,7 +45,7 @@ from public.slot_availability
 order by id;
 ```
 
-예상 결과는 342행입니다. 공개 슬롯 조회에는 고객 식별 정보가 없습니다. 기존 설치 DB에는 `sql/05_extend_slots_to_december.sql`을 추가 실행합니다. `tests/sql/*.sql`은 격리된 검사 DB 전용이며 실제 Supabase SQL Editor에 넣지 않습니다.
+예상 결과는 새 숫자 시간대 설치 후 1140행입니다. 공개 슬롯 조회에는 고객 식별 정보가 없습니다. 기존 설치 DB에는 `sql/05_extend_slots_to_december.sql` 실행 후 `sql/06_expand_time_slots.sql`을 추가 실행합니다. `tests/sql/*.sql`은 격리된 검사 DB 전용이며 실제 Supabase SQL Editor에 넣지 않습니다.
 
 ## 이메일 알림 설정
 
@@ -87,7 +87,7 @@ where id = '관리자로-지정할-사용자-UUID'::uuid;
 ## 첫 실행 프롬프트
 
 ```text
-AGENTS.md, PRD.md, START_HERE.md를 읽어라. 제공된 342슬롯과 SQL 업무 규칙을 재생성하지 마라. 환경 변수의 비밀값을 출력하지 말고 접속 모드를 확인하라. npm test와 npm run build를 실행하고, 로컬 검사와 실제 Supabase 로그인·저장 검증을 구분해서 보고하라. 운영 DB를 초기화하지 마라.
+AGENTS.md, PRD.md, START_HERE.md를 읽어라. 제공된 1140슬롯과 SQL 업무 규칙을 재생성하지 마라. 환경 변수의 비밀값을 출력하지 말고 접속 모드를 확인하라. npm test와 npm run build를 실행하고, 로컬 검사와 실제 Supabase 로그인·저장 검증을 구분해서 보고하라. 운영 DB를 초기화하지 마라.
 ```
 
 ## 파일과 무결성

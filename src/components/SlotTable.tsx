@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import type { Slot } from '../types';
-import { TIME_SLOTS, getAllDates, isSlotOpen } from '../utils/constants';
+import { TIME_GROUPS, TIME_SLOTS, getAllDates, isSlotOpen } from '../utils/constants';
 
 interface SlotTableProps {
   slots: Record<string, Slot>;
@@ -111,11 +111,11 @@ export const SlotTable: React.FC<SlotTableProps> = ({
                   aria-pressed={isSelected}
                 >
                   <span>{Number(date.slice(-2))}</span>
-                  <span className="calendar-slot-marks">{TIME_SLOTS.map(item => {
-                    const slotId = `${date}:${item.label}`;
-                    const open = isSlotOpen(slots[slotId]);
-                    const chosen = selectedSlots.includes(slotId);
-                    return <span className={`calendar-slot-mark ${open ? 'open' : 'closed'}${chosen ? ' chosen' : ''}`} key={slotId} />;
+                  <span className="calendar-slot-marks">{TIME_GROUPS.map(group => {
+                    const groupSlots = TIME_SLOTS.filter(item => item.period === group.period);
+                    const open = groupSlots.some(item => isSlotOpen(slots[`${date}:${item.label}`]));
+                    const chosen = groupSlots.some(item => selectedSlots.includes(`${date}:${item.label}`));
+                    return <span className={`calendar-slot-mark ${open ? 'open' : 'closed'}${chosen ? ' chosen' : ''}`} key={group.period} />;
                   })}</span>
                 </button>
               );
@@ -135,18 +135,25 @@ export const SlotTable: React.FC<SlotTableProps> = ({
       </div>
       <section className="availability-day selected-day">
         <div className="selected-day-heading"><h4>{formatDate(activeDate)}</h4><span>{TIME_SLOTS.filter(item => isSlotOpen(slots[`${activeDate}:${item.label}`])).length}개 가능</span></div>
-        <div className="time-options">
-          {TIME_SLOTS.map(item => {
-            const slotId = `${activeDate}:${item.label}`;
-            const isSelected = selectedSlots.includes(slotId);
-            const isClosed = !isSlotOpen(slots[slotId]);
-            const priority = selectedSlots.indexOf(slotId) + 1;
-            return mode === 'select' ? (
-              <button className={`time-option${isSelected ? ' selected' : ''}`} key={slotId} type="button" onClick={() => onToggle(slotId)} disabled={isClosed || (!isSelected && selectedSlots.length >= maxSelect)} aria-pressed={isSelected}>
-                {isSelected && <span className="time-priority">{priority}</span>}{item.displayLabel}{isClosed && <small>마감</small>}
-              </button>
-            ) : <span className={`time-option status-only${isClosed ? ' unavailable' : ''}`} key={slotId}>{item.displayLabel}<small>{isClosed ? '마감' : '가능'}</small></span>;
-          })}
+        <div className="time-groups">
+          {TIME_GROUPS.map(group => (
+            <div className="time-group" key={group.period}>
+              <h5>{group.label}</h5>
+              <div className="time-options">
+                {TIME_SLOTS.filter(item => item.period === group.period).map(item => {
+                  const slotId = `${activeDate}:${item.label}`;
+                  const isSelected = selectedSlots.includes(slotId);
+                  const isClosed = !isSlotOpen(slots[slotId]);
+                  const priority = selectedSlots.indexOf(slotId) + 1;
+                  return mode === 'select' ? (
+                    <button className={`time-option${isSelected ? ' selected' : ''}`} key={slotId} type="button" onClick={() => onToggle(slotId)} disabled={isClosed || (!isSelected && selectedSlots.length >= maxSelect)} aria-pressed={isSelected}>
+                      {isSelected && <span className="time-priority">{priority}</span>}{item.displayLabel}
+                    </button>
+                  ) : <span className={`time-option status-only${isClosed ? ' unavailable' : ''}`} key={slotId}>{item.displayLabel}</span>;
+                })}
+              </div>
+            </div>
+          ))}
         </div>
       </section>
     </div>
