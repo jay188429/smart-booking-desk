@@ -150,7 +150,7 @@ export const SupabaseCustomerPage: React.FC<Props> = ({ client, user }) => {
           <div className="booking-avatar" aria-hidden="true">S</div>
           <span className="eyebrow">Smart Booking Desk</span>
           <p>원하는 시간을 선택해 주세요.</p>
-          <div className="booking-detail"><span aria-hidden="true">◷</span><span>1시간 상담</span></div>
+          <div className="booking-detail"><span aria-hidden="true">◷</span><span>1시간 이용</span></div>
           <div className="booking-detail"><span aria-hidden="true">◷</span><span>현재 시각 {currentSeoulTime} (KST)</span></div>
           <p className="booking-account">로그인 계정<br /><strong>{user.email ?? user.id}</strong></p>
         </aside>
@@ -247,7 +247,7 @@ export const SupabaseCustomerPage: React.FC<Props> = ({ client, user }) => {
                 ) : currentRequest.status === 'confirmed' ? (
                   <div className="communication-item complete">
                     <span className="communication-icon">✓</span>
-                    <div><strong>예약 확정 안내</strong><p>확정된 시간으로 상담 예약이 완료되었습니다.</p><time>{formatCommunicationTime(currentRequest.confirmed_at || currentRequest.updated_at)}</time></div>
+                    <div><strong>예약 확정 안내</strong><p>확정된 시간으로 예약이 완료되었습니다.</p><time>{formatCommunicationTime(currentRequest.confirmed_at || currentRequest.updated_at)}</time></div>
                   </div>
                 ) : (
                   <div className="communication-item attention">
