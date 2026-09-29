@@ -1,6 +1,6 @@
 # cal.dudu 시작하기
 
-Node.js 22 LTS와 npm을 권장합니다. 예약 기간은 한국 시간 2026-09-09~12-31이며, 오전 9·10·11, 오후 13·14·15·16·17, 저녁 19·20을 선택합니다. 새 시간대 Supabase DB에는 `sql/06_expand_time_slots.sql`을 추가 실행합니다. 세 지점은 동일 시간표를 공유하며 신청에 지점만 매핑하려면 `sql/07_add_branches.sql`도 실행합니다.
+Node.js 22 LTS와 npm을 권장합니다. 예약 기간은 한국 시간 2026-09-09~12-31이며, 오전 9·10·11, 오후 13·14·15·16·17, 저녁 19·20을 선택합니다. 새 시간대 Supabase DB에는 `sql/06_expand_time_slots.sql`을 추가 실행합니다. 세 지점은 동일 시간표를 공유하며 신청에 지점만 매핑하려면 `sql/07_add_branches.sql`도 실행합니다. 지도 좌표까지 Supabase에 저장하려면 이어서 `sql/08_branch_map_coords.sql`을 실행합니다.
 
 ## 실행
 
@@ -23,9 +23,12 @@ npm run dev
 VITE_APP_MODE=supabase
 VITE_SUPABASE_URL=https://YOUR_PROJECT.supabase.co
 VITE_SUPABASE_ANON_KEY=YOUR_PUBLIC_ANON_OR_PUBLISHABLE_KEY
+VITE_KAKAO_MAP_APP_KEY=YOUR_KAKAO_JAVASCRIPT_KEY
 ```
 
 Supabase 프로젝트의 Connect/API 설정에서 Project URL과 anon 또는 publishable 공개 키를 확인합니다. service_role, secret key, DB 비밀번호는 브라우저 환경 변수에 넣지 않습니다. 환경 파일과 실제 계정은 Git/ZIP에 포함하지 않습니다.
+
+지도는 Kakao Maps JavaScript 키가 있을 때 세 지점을 역 중심의 가상 마커로 표시합니다. Kakao 개발자 콘솔에서 개발/배포 도메인을 허용 목록에 등록하세요. 키가 없거나 지도 로딩이 실패해도 예약은 지점 목록으로 계속 사용할 수 있습니다.
 
 상단 접속 모드 선택에서 **Supabase 실제 저장**을 선택하면 실제 로그인·DB 호출을 사용합니다. 설정 누락이나 연결 오류가 나도 로컬로 자동 전환하지 않습니다. **로컬 수업용 미리보기**는 기존 브라우저 데이터를 그대로 읽는 별도 모드입니다. 로컬 데이터는 Supabase로 자동 이전하지 않으며 초기화하지 않아도 모드를 바꿀 수 있습니다.
 
@@ -37,6 +40,7 @@ Supabase 프로젝트의 Connect/API 설정에서 Project URL과 anon 또는 pub
 2. `sql/02_public_slot_access.sql`: 공개 가용성 조회에 필요한 helper 접근 권한 보완. 예약 데이터나 업무 RPC 권한을 변경하지 않습니다.
 3. `sql/03_cancel_request.sql`: 관리자가 확정하지 않은 신청을 취소하고 새로 신청할 수 있는 RPC를 추가합니다.
 4. `sql/07_add_branches.sql`: 건대역지점(건대입구역), 강남지점(신논현역), 을지로지점(을지로입구역)을 추가하고 신청별 지점 매핑 RPC를 설치합니다. 슬롯은 지점 간 공유됩니다.
+5. `sql/08_branch_map_coords.sql`: 세 가상 지점의 역 인근 지도 좌표와 좌표 조회 RPC를 추가합니다.
 
 이미 01 설치를 마친 프로젝트에서 `permission denied for schema private`가 발생하면 **02만** 적용합니다. `sql/00_supabase.sql`은 이전 배포 원본 보존용이므로 실행하지 않습니다. 00으로 설치된 기존 DB에 01을 덧붙이는 방식은 지원하지 않습니다. 운영 DB 변경은 별도 검수 후 진행합니다.
 

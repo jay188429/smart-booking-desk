@@ -8,6 +8,7 @@ import { TIME_SLOTS, isSlotOpen } from '../utils/constants';
 import { BRANCHES, getBranch, type BranchId } from '../utils/branches';
 import { getSlaState, getSlaText } from '../utils/sla';
 import { recommendAlternativeSlots } from '../utils/recommend';
+import { BranchMap } from './BranchMap';
 
 interface CustomerPageProps {
   db: DatabaseManager;
@@ -209,6 +210,7 @@ export const CustomerPage: React.FC<CustomerPageProps> = ({ db }) => {
               <div><span className="eyebrow">예약 지점</span><h2>{getBranch(branchId).name}</h2></div>
               <span>{getBranch(branchId).station}</span>
             </div>
+            <BranchMap selectedBranchId={branchId} onSelect={setBranchId} />
             <div className="branch-options">
               {BRANCHES.map(branch => (
                 <button key={branch.id} type="button" className={`branch-option${branchId === branch.id ? ' selected' : ''}`} onClick={() => setBranchId(branch.id)}>

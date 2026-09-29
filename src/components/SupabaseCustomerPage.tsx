@@ -7,6 +7,7 @@ import { getSlaState, getSlaText } from '../utils/sla';
 import { recommendAlternativeSlots } from '../utils/recommend';
 import { sendBookingEmail } from '../utils/booking-email';
 import { BRANCHES, getBranch, type BranchId } from '../utils/branches';
+import { BranchMap } from './BranchMap';
 
 interface Props { client: SupabaseClient; user: User }
 
@@ -162,6 +163,7 @@ export const SupabaseCustomerPage: React.FC<Props> = ({ client, user }) => {
               <div><span className="eyebrow">예약 지점</span><h2>{getBranch(activeBranchId).name}</h2></div>
               <span>{getBranch(activeBranchId).station}</span>
             </div>
+            <BranchMap selectedBranchId={getBranch(activeBranchId).id as BranchId} onSelect={setBranchId} />
             <div className="branch-options">
               {BRANCHES.map(branch => (
                 <button
