@@ -61,7 +61,7 @@ export const GoogleLoginPage: React.FC<GoogleLoginPageProps> = ({ onLoginSuccess
             <span className="eyebrow">Smart Booking Desk</span>
             <h1>예약 상담</h1>
             <p>가능한 시간을 선택하고 운영자 확인을 거쳐 상담 예약을 완료하세요.</p>
-            <div className="login-detail"><span aria-hidden="true">◷</span>30분 상담</div>
+            <div className="login-detail"><span aria-hidden="true">◷</span>1시간 상담</div>
             <div className="login-detail"><span aria-hidden="true">◎</span>Asia / Seoul</div>
             <div className="login-intro-footer">간단한 로그인 후 예약 가능한 시간을 확인할 수 있습니다.</div>
           </section>
