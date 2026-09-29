@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import type { SupabaseClient, User } from '@supabase/supabase-js';
-import { SlotTable } from './SlotTable';
 import { readSnapshot, writeReservation, type Snapshot } from '../utils/reservation-api';
 import { isSlotOpen } from '../utils/constants';
 import { getSlaState, getSlaText } from '../utils/sla';
@@ -21,13 +20,16 @@ export const SupabaseAdminPage: React.FC<Props> = ({ client, user }) => {
   const [now, setNow] = useState(() => Date.now());
   const [autoMatching, setAutoMatching] = useState(false);
 
-  const load = async () => {
+  const load = async (): Promise<Snapshot | null> => {
     setLoading(true);
     try {
-      setSnapshot(await readSnapshot(client, user.id, true));
+      const nextSnapshot = await readSnapshot(client, user.id, true);
+      setSnapshot(nextSnapshot);
       setError('');
+      return nextSnapshot;
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : String(reason));
+      return null;
     } finally {
       setLoading(false);
     }
@@ -82,10 +84,13 @@ export const SupabaseAdminPage: React.FC<Props> = ({ client, user }) => {
       const { data, error: resetError } = await client.rpc('admin_reset_reservations');
       if (resetError) throw resetError;
       if (!data?.success) throw new Error(data?.error || '초기화가 거절되었습니다.');
-      setSuccess('예약 데이터 초기화 완료');
       setSelectedRequestId('');
       setSelectedSlotId('');
-      await load();
+      const refreshed = await load();
+      if (!refreshed || refreshed.requests.length > 0) {
+        throw new Error('초기화 확인 실패: 아직 예약 요청이 남아 있습니다. Supabase에서 sql/04_admin_reset_fix.sql을 실행하세요.');
+      }
+      setSuccess('예약 데이터 초기화 완료 (신청 0건)');
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : String(reason));
     } finally {
@@ -197,9 +202,6 @@ export const SupabaseAdminPage: React.FC<Props> = ({ client, user }) => {
           ) : <p>왼쪽 신청 목록에서 신청을 선택하세요.</p>}
         </section>
       </div>
-      <h3>슬롯 현황</h3>
-      <SlotTable slots={slots} selectedSlots={[]} onToggle={() => {}} mode="view" />
-      <button className="btn btn-secondary" onClick={() => void load()} disabled={loading}>새로고침</button>
     </div>
   );
 };
