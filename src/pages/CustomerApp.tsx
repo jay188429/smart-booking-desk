@@ -1,5 +1,6 @@
 import React from 'react';
 import { SupabaseCustomerPage } from '../components/SupabaseCustomerPage';
+import { WeatherStatus } from '../components/WeatherStatus';
 import { supabase, signOut } from '../utils/supabase';
 import type { User } from '@supabase/supabase-js';
 
@@ -27,7 +28,7 @@ export const CustomerApp: React.FC<CustomerAppProps> = ({ user, userRole, onLogo
           <div className="welcome-message">
             <strong>{user.user_metadata?.name || user.user_metadata?.full_name || user.email?.split('@')[0] || '고객'}님 안녕하세요</strong>
             <span>오늘 하루는 어떠신가요?</span>
-            <span>날씨가 참 좋네요.</span>
+            <WeatherStatus />
           </div>
         </div>
         <div className="role-selector">

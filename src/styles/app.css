@@ -356,6 +356,23 @@ body {
   font-size: 14px;
 }
 
+.weather-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink-soft);
+}
+
+.weather-icon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.weather-status-loading {
+  color: #8196aa;
+  font-size: 11px;
+}
+
 .role-selector {
   display: flex;
   gap: 10px;

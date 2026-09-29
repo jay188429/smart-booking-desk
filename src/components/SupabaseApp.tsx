@@ -5,6 +5,7 @@ import { AdminPage } from './AdminPage';
 import { DatabaseManager } from '../utils/database';
 import { supabase, signOut, getUserRole } from '../utils/supabase';
 import type { User } from '@supabase/supabase-js';
+import { WeatherStatus } from './WeatherStatus';
 
 interface SupabaseAppProps {
   config: {
@@ -87,7 +88,7 @@ export const SupabaseApp: React.FC<SupabaseAppProps> = () => {
           <div className="welcome-message">
             <strong>{user.user_metadata?.name || user.user_metadata?.full_name || user.email?.split('@')[0] || '고객'}님 안녕하세요</strong>
             <span>오늘 하루는 어떠신가요?</span>
-            <span>날씨가 참 좋네요.</span>
+            <WeatherStatus />
           </div>
         </div>
 
