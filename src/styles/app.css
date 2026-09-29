@@ -357,10 +357,15 @@ body {
 }
 
 .weather-status {
+  display: grid;
+  gap: 6px;
+  color: var(--ink-soft);
+}
+
+.weather-summary {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: var(--ink-soft);
 }
 
 .weather-icon {
@@ -371,6 +376,11 @@ body {
 .weather-status-loading {
   color: #8196aa;
   font-size: 11px;
+}
+
+.weather-message {
+  color: #d6e4ee;
+  font-size: 12px;
 }
 
 .role-selector {
