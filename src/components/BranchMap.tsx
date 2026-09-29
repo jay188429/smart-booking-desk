@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { BRANCHES, type BranchId } from '../utils/branches';
 
 interface Props {
@@ -37,7 +37,16 @@ export const BranchMap: React.FC<Props> = ({ selectedBranchId, onSelect }) => {
   const mapRef = useRef<KakaoMapInstance | null>(null);
   const markersRef = useRef<KakaoMarker[]>([]);
   const [mapError, setMapError] = useState('');
+  const [modalBranchId, setModalBranchId] = useState<BranchId | null>(null);
   const appKey = import.meta.env.VITE_KAKAO_MAP_APP_KEY;
+
+  const openBranch = useCallback((branchId: BranchId) => {
+    setModalBranchId(branchId);
+    const branch = BRANCHES.find(item => item.id === branchId);
+    if (branch && mapRef.current && window.kakao) {
+      mapRef.current.setCenter(new window.kakao.maps.LatLng(branch.latitude, branch.longitude));
+    }
+  }, []);
 
   useEffect(() => {
     if (!appKey || !mapElement.current) return;
@@ -57,7 +66,7 @@ export const BranchMap: React.FC<Props> = ({ selectedBranchId, onSelect }) => {
             position: new maps.LatLng(branch.latitude, branch.longitude),
             title: `${branch.name} · ${branch.station}`,
           });
-          maps.event.addListener(marker, 'click', () => onSelect(BRANCHES[index].id));
+          maps.event.addListener(marker, 'click', () => openBranch(BRANCHES[index].id));
           return marker;
         });
       });
@@ -84,14 +93,12 @@ export const BranchMap: React.FC<Props> = ({ selectedBranchId, onSelect }) => {
       markersRef.current = [];
       mapRef.current = null;
     };
-  }, [appKey, onSelect]);
+  }, [appKey, openBranch]);
 
-  const selectBranch = (branchId: BranchId) => {
-    onSelect(branchId);
-    const branch = BRANCHES.find(item => item.id === branchId);
-    if (branch && mapRef.current && window.kakao) {
-      mapRef.current.setCenter(new window.kakao.maps.LatLng(branch.latitude, branch.longitude));
-    }
+  const modalBranch = modalBranchId ? BRANCHES.find(branch => branch.id === modalBranchId) : undefined;
+  const confirmBranch = () => {
+    if (modalBranch) onSelect(modalBranch.id);
+    setModalBranchId(null);
   };
 
   return (
@@ -109,13 +116,38 @@ export const BranchMap: React.FC<Props> = ({ selectedBranchId, onSelect }) => {
             key={branch.id}
             type="button"
             className={`branch-map-item${selectedBranchId === branch.id ? ' selected' : ''}`}
-            onClick={() => selectBranch(branch.id)}
+            onClick={() => openBranch(branch.id)}
           >
             <strong>{branch.name}</strong>
             <span>{branch.station} · 가상 지점</span>
           </button>
         ))}
       </div>
+      {modalBranch && (
+        <div className="branch-map-modal-backdrop" role="presentation" onMouseDown={() => setModalBranchId(null)}>
+          <section
+            className="branch-map-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="branch-map-modal-title"
+            onMouseDown={event => event.stopPropagation()}
+          >
+            <div className="branch-map-modal-heading">
+              <div>
+                <span className="eyebrow">지점 위치</span>
+                <h3 id="branch-map-modal-title">{modalBranch.name}</h3>
+              </div>
+              <button type="button" className="branch-map-modal-close" onClick={() => setModalBranchId(null)} aria-label="위치 모달 닫기">×</button>
+            </div>
+            <p className="branch-map-modal-station">{modalBranch.station} 인근</p>
+            <p className="branch-map-modal-note">실제 매장이 아닌 역 인근 기준의 가상 지점입니다.</p>
+            <div className="branch-map-modal-actions">
+              <button type="button" className="btn btn-secondary" onClick={() => setModalBranchId(null)}>닫기</button>
+              <button type="button" className="btn btn-primary" onClick={confirmBranch}>이 지점 선택</button>
+            </div>
+          </section>
+        </div>
+      )}
     </div>
   );
 };
