@@ -5,7 +5,7 @@ import { OperationManager } from '../utils/operations';
 import { DatabaseManager } from '../utils/database';
 import { decideRequestStatus } from '../utils/decide';
 import { TIME_SLOTS, isSlotOpen } from '../utils/constants';
-import { BRANCHES, getBranch, type BranchId } from '../utils/branches';
+import { getBranch, type BranchId } from '../utils/branches';
 import { getSlaState, getSlaText } from '../utils/sla';
 import { recommendAlternativeSlots } from '../utils/recommend';
 import { BranchMap } from './BranchMap';
@@ -211,13 +211,6 @@ export const CustomerPage: React.FC<CustomerPageProps> = ({ db }) => {
               <span>{getBranch(branchId).station}</span>
             </div>
             <BranchMap selectedBranchId={branchId} onSelect={setBranchId} />
-            <div className="branch-options">
-              {BRANCHES.map(branch => (
-                <button key={branch.id} type="button" className={`branch-option${branchId === branch.id ? ' selected' : ''}`} onClick={() => setBranchId(branch.id)}>
-                  <strong>{branch.name}</strong><span>{branch.station}</span>
-                </button>
-              ))}
-            </div>
             <p>세 지점은 동일한 예약 시간표를 사용합니다.</p>
           </div>
           <SlotTable

@@ -6,7 +6,7 @@ import { TIME_SLOTS, parseSlotId } from '../utils/constants';
 import { getSlaState, getSlaText } from '../utils/sla';
 import { recommendAlternativeSlots } from '../utils/recommend';
 import { sendBookingEmail } from '../utils/booking-email';
-import { BRANCHES, getBranch, type BranchId } from '../utils/branches';
+import { getBranch, type BranchId } from '../utils/branches';
 import { BranchMap } from './BranchMap';
 
 interface Props { client: SupabaseClient; user: User }
@@ -164,19 +164,6 @@ export const SupabaseCustomerPage: React.FC<Props> = ({ client, user }) => {
               <span>{getBranch(activeBranchId).station}</span>
             </div>
             <BranchMap selectedBranchId={getBranch(activeBranchId).id as BranchId} onSelect={setBranchId} />
-            <div className="branch-options">
-              {BRANCHES.map(branch => (
-                <button
-                  key={branch.id}
-                  type="button"
-                  className={`branch-option${activeBranchId === branch.id ? ' selected' : ''}`}
-                  onClick={() => setBranchId(branch.id)}
-                  disabled={Boolean(currentRequest) && !needsReselection}
-                >
-                  <strong>{branch.name}</strong><span>{branch.station}</span>
-                </button>
-              ))}
-            </div>
             <p>세 지점은 동일한 예약 시간표를 사용합니다.</p>
           </section>
           {currentRequest && (
