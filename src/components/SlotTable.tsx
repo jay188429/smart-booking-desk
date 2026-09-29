@@ -23,11 +23,11 @@ export const SlotTable: React.FC<SlotTableProps> = ({
   const calendarMonths = Array.from(new Set(dates.map(date => date.slice(0, 7)))).map(month => {
     const monthDates = dates.filter(date => date.startsWith(month));
     const firstDate = monthDates[0] || `${month}-01`;
-    const firstDay = new Date(`${firstDate}T00:00:00+09:00`);
+    const firstDay = new Date(`${firstDate}T00:00:00Z`);
     return {
       month,
       label: firstDay.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', timeZone: 'Asia/Seoul' }),
-      firstWeekday: firstDay.getDay(),
+      firstWeekday: firstDay.getUTCDay(),
       dates: monthDates,
     };
   });
