@@ -1896,6 +1896,46 @@ body {
 
   .calendar-selection-layout {
     grid-template-columns: 1fr;
+    width: 100%;
+    min-width: 0;
+    overflow-x: hidden;
+  }
+
+  .calendar-months,
+  .calendar-month,
+  .calendar-grid {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .calendar-grid {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 2px;
+    padding: 10px 6px;
+  }
+
+  .calendar-month-header {
+    gap: 4px;
+  }
+
+  .calendar-nav-button {
+    min-width: 0;
+    padding: 0 5px;
+    font-size: 10px;
+  }
+
+  .calendar-month h4 {
+    font-size: 14px;
+  }
+
+  .calendar-day {
+    height: 54px;
+    min-height: 54px;
+    font-size: 12px;
+  }
+
+  .calendar-slot-marks {
+    width: min(26px, 70%);
   }
 
   .selection-summary {
