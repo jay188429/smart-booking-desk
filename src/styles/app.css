@@ -1083,6 +1083,11 @@ body {
   justify-self: center;
 }
 
+.calendar-day {
+  justify-self: stretch;
+  margin: 0;
+}
+
 .calendar-slot-marks {
   display: flex;
   flex-direction: column;
