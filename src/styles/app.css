@@ -1779,6 +1779,14 @@ body {
 }
 
 @media (max-width: 560px) {
+  .customer-route {
+    min-width: 600px;
+  }
+
+  .customer-route .booking-shell {
+    min-width: 560px;
+  }
+
   .customer-app-shell {
     padding: 10px 10px 24px;
   }

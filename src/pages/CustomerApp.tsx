@@ -21,7 +21,7 @@ export const CustomerApp: React.FC<CustomerAppProps> = ({ user, userRole, onLogo
   };
 
   return (
-    <div className="container">
+    <div className="container customer-route">
       <div className="header">
         <div>
           <h1>Smart Booking Desk</h1>
