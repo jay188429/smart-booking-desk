@@ -23,12 +23,12 @@ npm run dev
 VITE_APP_MODE=supabase
 VITE_SUPABASE_URL=https://YOUR_PROJECT.supabase.co
 VITE_SUPABASE_ANON_KEY=YOUR_PUBLIC_ANON_OR_PUBLISHABLE_KEY
-VITE_KAKAO_MAP_APP_KEY=YOUR_KAKAO_JAVASCRIPT_KEY
+VITE_GOOGLE_MAPS_API_KEY=YOUR_GOOGLE_MAPS_API_KEY
 ```
 
 Supabase 프로젝트의 Connect/API 설정에서 Project URL과 anon 또는 publishable 공개 키를 확인합니다. service_role, secret key, DB 비밀번호는 브라우저 환경 변수에 넣지 않습니다. 환경 파일과 실제 계정은 Git/ZIP에 포함하지 않습니다.
 
-지도는 Kakao Maps JavaScript 키가 있을 때 세 지점을 역 중심의 가상 마커로 표시합니다. Kakao 개발자 콘솔에서 개발/배포 도메인을 허용 목록에 등록하세요. 키가 없거나 지도 로딩이 실패해도 예약은 지점 목록으로 계속 사용할 수 있습니다.
+지도는 Google Maps JavaScript API 키가 있을 때 세 지점을 역 중심의 가상 마커로 표시합니다. Google Cloud에서 Maps JavaScript API를 활성화하고 API 키의 웹사이트(HTTP referrer) 제한을 설정하세요. 키가 없거나 지도 로딩이 실패해도 예약은 지점 목록으로 계속 사용할 수 있습니다.
 
 상단 접속 모드 선택에서 **Supabase 실제 저장**을 선택하면 실제 로그인·DB 호출을 사용합니다. 설정 누락이나 연결 오류가 나도 로컬로 자동 전환하지 않습니다. **로컬 수업용 미리보기**는 기존 브라우저 데이터를 그대로 읽는 별도 모드입니다. 로컬 데이터는 Supabase로 자동 이전하지 않으며 초기화하지 않아도 모드를 바꿀 수 있습니다.
 

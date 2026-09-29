@@ -6,83 +6,79 @@ interface Props {
   onSelect: (branchId: BranchId) => void;
 }
 
-interface KakaoMapApi {
+interface GoogleMapApi {
   maps: {
     LatLng: new (latitude: number, longitude: number) => unknown;
-    Map: new (container: HTMLElement, options: { center: unknown; level: number }) => KakaoMapInstance;
-    Marker: new (options: { map: KakaoMapInstance; position: unknown; title?: string }) => KakaoMarker;
-    event: { addListener: (target: KakaoMarker, eventName: string, handler: () => void) => void };
-    load: (callback: () => void) => void;
+    Map: new (container: HTMLElement, options: { center: unknown; zoom: number }) => GoogleMapInstance;
+    Marker: new (options: { map: GoogleMapInstance; position: unknown; title?: string }) => GoogleMarker;
+    event: { addListener: (target: GoogleMarker, eventName: string, handler: () => void) => void };
   };
 }
 
-interface KakaoMapInstance {
+interface GoogleMapInstance {
   setCenter: (center: unknown) => void;
 }
 
-interface KakaoMarker {
-  setMap: (map: KakaoMapInstance | null) => void;
+interface GoogleMarker {
+  setMap: (map: GoogleMapInstance | null) => void;
 }
 
 declare global {
   interface Window {
-    kakao?: KakaoMapApi;
+    google?: GoogleMapApi;
   }
 }
 
-const KAKAO_SCRIPT_ID = 'kakao-maps-sdk';
+const GOOGLE_SCRIPT_ID = 'google-maps-sdk';
+const GOOGLE_CALLBACK = '__smartBookingGoogleMapsLoaded';
 
 export const BranchMap: React.FC<Props> = ({ selectedBranchId, onSelect }) => {
   const mapElement = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<KakaoMapInstance | null>(null);
-  const markersRef = useRef<KakaoMarker[]>([]);
+  const mapRef = useRef<GoogleMapInstance | null>(null);
+  const markersRef = useRef<GoogleMarker[]>([]);
   const [mapError, setMapError] = useState('');
   const [modalBranchId, setModalBranchId] = useState<BranchId | null>(null);
-  const appKey = import.meta.env.VITE_KAKAO_MAP_APP_KEY;
+  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
   const openBranch = useCallback((branchId: BranchId) => {
     setModalBranchId(branchId);
     const branch = BRANCHES.find(item => item.id === branchId);
-    if (branch && mapRef.current && window.kakao) {
-      mapRef.current.setCenter(new window.kakao.maps.LatLng(branch.latitude, branch.longitude));
+    if (branch && mapRef.current && window.google) {
+      mapRef.current.setCenter(new window.google.maps.LatLng(branch.latitude, branch.longitude));
     }
   }, []);
 
   useEffect(() => {
-    if (!appKey || !mapElement.current) return;
+    if (!apiKey || !mapElement.current) return;
 
     let cancelled = false;
     const renderMap = () => {
-      if (cancelled || !mapElement.current || !window.kakao) return;
-      const { maps } = window.kakao;
-      maps.load(() => {
-        if (cancelled || !mapElement.current || !window.kakao) return;
-        const center = new maps.LatLng(37.548, 127.026);
-        const map = new maps.Map(mapElement.current, { center, level: 8 });
-        mapRef.current = map;
-        markersRef.current = BRANCHES.map((branch, index) => {
-          const marker = new maps.Marker({
-            map,
-            position: new maps.LatLng(branch.latitude, branch.longitude),
-            title: `${branch.name} · ${branch.station}`,
-          });
-          maps.event.addListener(marker, 'click', () => openBranch(BRANCHES[index].id));
-          return marker;
+      if (cancelled || !mapElement.current || !window.google) return;
+      const { maps } = window.google;
+      const center = new maps.LatLng(37.548, 127.026);
+      const map = new maps.Map(mapElement.current, { center, zoom: 11 });
+      mapRef.current = map;
+      markersRef.current = BRANCHES.map((branch, index) => {
+        const marker = new maps.Marker({
+          map,
+          position: new maps.LatLng(branch.latitude, branch.longitude),
+          title: `${branch.name} · ${branch.station}`,
         });
+        maps.event.addListener(marker, 'click', () => openBranch(BRANCHES[index].id));
+        return marker;
       });
     };
 
-    const existingScript = document.getElementById(KAKAO_SCRIPT_ID) as HTMLScriptElement | null;
-    if (window.kakao?.maps) {
+    const existingScript = document.getElementById(GOOGLE_SCRIPT_ID) as HTMLScriptElement | null;
+    const globalWindow = window as unknown as Record<string, () => void>;
+    globalWindow[GOOGLE_CALLBACK] = renderMap;
+    if (window.google?.maps) {
       renderMap();
-    } else if (existingScript) {
-      existingScript.addEventListener('load', renderMap, { once: true });
-    } else {
+    } else if (!existingScript) {
       const script = document.createElement('script');
-      script.id = KAKAO_SCRIPT_ID;
+      script.id = GOOGLE_SCRIPT_ID;
       script.async = true;
-      script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${encodeURIComponent(appKey)}&autoload=false`;
-      script.addEventListener('load', renderMap, { once: true });
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}&loading=async&callback=${GOOGLE_CALLBACK}`;
       script.addEventListener('error', () => setMapError('지도를 불러오지 못했습니다. 아래 지점 목록으로 선택할 수 있습니다.'), { once: true });
       document.head.appendChild(script);
     }
@@ -92,8 +88,9 @@ export const BranchMap: React.FC<Props> = ({ selectedBranchId, onSelect }) => {
       markersRef.current.forEach(marker => marker.setMap(null));
       markersRef.current = [];
       mapRef.current = null;
+      delete globalWindow[GOOGLE_CALLBACK];
     };
-  }, [appKey, openBranch]);
+  }, [apiKey, openBranch]);
 
   const modalBranch = modalBranchId ? BRANCHES.find(branch => branch.id === modalBranchId) : undefined;
   const confirmBranch = () => {
@@ -103,8 +100,8 @@ export const BranchMap: React.FC<Props> = ({ selectedBranchId, onSelect }) => {
 
   return (
     <div className="branch-map-wrap">
-      {appKey && !mapError ? <div ref={mapElement} className="branch-map-canvas" aria-label="지점 위치 지도" /> : null}
-      {(!appKey || mapError) && (
+      {apiKey && !mapError ? <div ref={mapElement} className="branch-map-canvas" aria-label="지점 위치 지도" /> : null}
+      {(!apiKey || mapError) && (
         <div className="branch-map-fallback" role="status">
           <strong>{mapError || '지도 키를 설정하면 역 중심 지도를 표시합니다.'}</strong>
           <span>실제 매장이 아닌 역 인근 기준의 가상 지점입니다.</span>
