@@ -1078,6 +1078,11 @@ body {
   cursor: not-allowed;
 }
 
+.calendar-day > span:first-child,
+.calendar-slot-marks {
+  justify-self: center;
+}
+
 .calendar-slot-marks {
   display: flex;
   flex-direction: column;
