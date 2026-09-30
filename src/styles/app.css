@@ -734,9 +734,10 @@ body {
 }
 
 .customer-route {
-  max-height: 100vh;
-  overflow-x: auto;
-  overflow-y: auto;
+  width: 100vw;
+  height: 100vh;
+  overflow: scroll;
+  box-sizing: border-box;
   scrollbar-color: #46617c #07182a;
   scrollbar-width: thin;
 }
