@@ -7,6 +7,8 @@ import { TIME_SLOTS, isSlotOpen } from '../utils/constants';
 import { syncToSupabase } from '../utils/supabase-sync';
 import { getSlaText } from '../utils/sla';
 import { chooseAutoMatch } from '../utils/auto-match';
+import { getBranch } from '../utils/branches';
+import { notifySlack } from '../utils/slack';
 
 interface AdminPageProps {
   db: DatabaseManager;
@@ -80,6 +82,13 @@ export const AdminPage: React.FC<AdminPageProps> = ({ db, mode }) => {
       console.log('확정 결과:', result);
 
       if (result.success) {
+        const confirmedRequest = requests.find(item => item.request.id === selectedRequest)?.request;
+        void notifySlack('confirmed', {
+          requestId: selectedRequest,
+          customerId: confirmedRequest?.customerId,
+          branchName: getBranch(confirmedRequest?.branchId).name,
+          slotId: selectedSlotForConfirm,
+        });
         if (mode === 'supabase') {
           const state = db.getState();
           await syncToSupabase(state.slots, state.requests, state.candidates);
@@ -122,6 +131,13 @@ export const AdminPage: React.FC<AdminPageProps> = ({ db, mode }) => {
         if (!match) break;
         const result = await om.confirmRequest(match.requestId, match.slotId, adminId, `auto-${match.requestId}-${match.slotId}-${Date.now()}`);
         if (!result.success) break;
+        const matchedRequest = currentRequests.find(item => item.request.id === match.requestId)?.request;
+        void notifySlack('confirmed', {
+          requestId: match.requestId,
+          customerId: matchedRequest?.customerId,
+          branchName: getBranch(matchedRequest?.branchId).name,
+          slotId: match.slotId,
+        });
         matched += 1;
       }
       setSuccess(matched ? `규칙 기반 자동 매칭 ${matched}건 완료` : '자동 매칭 가능한 신청이 없습니다.');

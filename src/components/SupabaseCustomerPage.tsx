@@ -8,6 +8,7 @@ import { recommendAlternativeSlots } from '../utils/recommend';
 import { sendBookingEmail } from '../utils/booking-email';
 import { getBranch, type BranchId } from '../utils/branches';
 import { BranchMap } from './BranchMap';
+import { notifySlack } from '../utils/slack';
 
 interface Props { client: SupabaseClient; user: User }
 
@@ -94,6 +95,7 @@ export const SupabaseCustomerPage: React.FC<Props> = ({ client, user }) => {
       if (needsReselection) payload.p_slot_ids = slotIds;
       const result = await writeReservation(client, user.id, action, payload);
       if (result.requestId) void sendBookingEmail(client, 'submitted', result.requestId);
+      void notifySlack(needsReselection ? 'reselected' : 'submitted', { requestId: result.requestId, customerId: user.id, branchName: getBranch(activeBranchId).name });
       setSelectedSlots([]);
       setReviewing(false);
       await load();

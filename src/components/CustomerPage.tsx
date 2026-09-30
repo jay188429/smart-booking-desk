@@ -9,6 +9,7 @@ import { getBranch, type BranchId } from '../utils/branches';
 import { getSlaState, getSlaText } from '../utils/sla';
 import { recommendAlternativeSlots } from '../utils/recommend';
 import { BranchMap } from './BranchMap';
+import { notifySlack } from '../utils/slack';
 
 interface CustomerPageProps {
   db: DatabaseManager;
@@ -105,6 +106,7 @@ export const CustomerPage: React.FC<CustomerPageProps> = ({ db }) => {
       const result = await om.submitRequest(customerId, selectedSlots, operationId, branchId);
 
       if (result.success) {
+        void notifySlack('submitted', { requestId: result.requestId, customerId, branchName: getBranch(branchId).name });
         setSuccess('신청이 완료되었습니다!');
         setSelectedSlots([]);
         setStage('view');
@@ -141,6 +143,7 @@ export const CustomerPage: React.FC<CustomerPageProps> = ({ db }) => {
       );
 
       if (result.success) {
+        void notifySlack('reselected', { requestId: result.requestId, customerId, branchName: getBranch(branchId).name });
         setSuccess('재선택이 완료되었습니다!');
         setSelectedSlots([]);
         setStage('view');

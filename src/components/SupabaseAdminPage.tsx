@@ -6,6 +6,7 @@ import { getSlaState, getSlaText } from '../utils/sla';
 import { chooseAutoMatch } from '../utils/auto-match';
 import { sendBookingEmail } from '../utils/booking-email';
 import { getBranch } from '../utils/branches';
+import { notifySlack } from '../utils/slack';
 
 interface Props { client: SupabaseClient; user: User }
 
@@ -65,6 +66,7 @@ export const SupabaseAdminPage: React.FC<Props> = ({ client, user }) => {
         p_admin_id: user.id,
       });
       void sendBookingEmail(client, 'confirmed', request.id, selectedSlotId);
+      void notifySlack('confirmed', { requestId: request.id, customerId: request.customer_id, branchName: getBranch(request.branch_id).name, slotId: selectedSlotId });
       setSuccess('Supabase 확정 저장 완료');
       setSelectedRequestId('');
       setSelectedSlotId('');
