@@ -6,15 +6,13 @@ interface Props {
   onSelect: (branchId: BranchId) => void;
 }
 
-const buildMapUrl = (apiKey: string) => {
+const buildMapUrl = (apiKey: string, branchId: BranchId) => {
+  const branch = BRANCHES.find(item => item.id === branchId) ?? BRANCHES[0];
   const params = new URLSearchParams({
-    style: 'osm-bright', width: '900', height: '320', center: 'lonlat:127.026,37.548', zoom: '11',
+    style: 'osm-bright', width: '900', height: '320', center: `lonlat:${branch.longitude},${branch.latitude}`, zoom: '14',
     format: 'png', apiKey,
   });
-  BRANCHES.forEach(branch => params.append(
-    'marker',
-    `lonlat:${branch.longitude},${branch.latitude};type:material;color:#6de0d0;size:42;text:${branch.name.replace('지점', '')}`,
-  ));
+  params.append('marker', `lonlat:${branch.longitude},${branch.latitude};type:material;color:#6de0d0;size:42;text:${branch.name.replace('지점', '')}`);
   return `https://maps.geoapify.com/v1/staticmap?${params.toString()}`;
 };
 
@@ -32,7 +30,7 @@ export const BranchMap: React.FC<Props> = ({ selectedBranchId, onSelect }) => {
     <div className="branch-map-wrap">
       {apiKey ? (
         <figure className="branch-map-figure">
-          <img className="branch-map-image" src={buildMapUrl(apiKey)} alt="서울 세 가상 지점의 역 인근 위치 지도" />
+          <img className="branch-map-image" src={buildMapUrl(apiKey, selectedBranchId)} alt={`${BRANCHES.find(branch => branch.id === selectedBranchId)?.name ?? '선택한 지점'} 위치 지도`} />
           <figcaption>© OpenStreetMap contributors · © Geoapify · 실제 매장이 아닌 역 인근 기준의 가상 지점</figcaption>
         </figure>
       ) : (
