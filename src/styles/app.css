@@ -1075,67 +1075,6 @@ body {
   background: rgba(109, 224, 208, 0.1);
 }
 
-.branch-map-modal-backdrop {
-  position: fixed;
-  z-index: 20;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  padding: 20px;
-  background: rgba(3, 15, 27, 0.76);
-}
-
-.branch-map-modal {
-  width: min(360px, 100%);
-  padding: 20px;
-  border: 1px solid rgba(109, 224, 208, 0.4);
-  border-radius: 10px;
-  background: #102945;
-  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.32);
-}
-
-.branch-map-modal-heading {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.branch-map-modal h3 {
-  margin: 5px 0 0;
-  color: #fff;
-  font-size: 22px;
-}
-
-.branch-map-modal-close {
-  border: 0;
-  background: transparent;
-  color: #8ea1b2;
-  font-size: 25px;
-  line-height: 1;
-  cursor: pointer;
-}
-
-.branch-map-modal-station {
-  margin: 18px 0 5px;
-  color: #dce9f4;
-  font-size: 16px;
-  font-weight: 700;
-}
-
-.branch-map-modal-note {
-  margin: 0;
-  color: #8ea1b2;
-  font-size: 12px;
-}
-
-.branch-map-modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  margin-top: 22px;
-}
-
 .availability-board {
   margin: 30px 0 26px;
 }

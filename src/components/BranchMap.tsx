@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { BRANCHES, type BranchId } from '../utils/branches';
 
 interface Props {
@@ -17,14 +17,7 @@ const buildMapUrl = (apiKey: string, branchId: BranchId) => {
 };
 
 export const BranchMap: React.FC<Props> = ({ selectedBranchId, onSelect }) => {
-  const [modalBranchId, setModalBranchId] = useState<BranchId | null>(null);
   const apiKey = import.meta.env.VITE_GEOAPIFY_API_KEY;
-  const modalBranch = modalBranchId ? BRANCHES.find(branch => branch.id === modalBranchId) : undefined;
-
-  const confirmBranch = () => {
-    if (modalBranch) onSelect(modalBranch.id);
-    setModalBranchId(null);
-  };
 
   return (
     <div className="branch-map-wrap">
@@ -41,28 +34,12 @@ export const BranchMap: React.FC<Props> = ({ selectedBranchId, onSelect }) => {
       )}
       <div className="branch-map-list" aria-label="지점 목록">
         {BRANCHES.map(branch => (
-          <button key={branch.id} type="button" className={`branch-map-item${selectedBranchId === branch.id ? ' selected' : ''}`} onClick={() => setModalBranchId(branch.id)}>
+          <button key={branch.id} type="button" className={`branch-map-item${selectedBranchId === branch.id ? ' selected' : ''}`} onClick={() => onSelect(branch.id)}>
             <strong>{branch.name}</strong>
             <span>{branch.station} · 가상 지점</span>
           </button>
         ))}
       </div>
-      {modalBranch && (
-        <div className="branch-map-modal-backdrop" role="presentation" onMouseDown={() => setModalBranchId(null)}>
-          <section className="branch-map-modal" role="dialog" aria-modal="true" aria-labelledby="branch-map-modal-title" onMouseDown={event => event.stopPropagation()}>
-            <div className="branch-map-modal-heading">
-              <div><span className="eyebrow">지점 위치</span><h3 id="branch-map-modal-title">{modalBranch.name}</h3></div>
-              <button type="button" className="branch-map-modal-close" onClick={() => setModalBranchId(null)} aria-label="위치 모달 닫기">×</button>
-            </div>
-            <p className="branch-map-modal-station">{modalBranch.station} 인근</p>
-            <p className="branch-map-modal-note">실제 매장이 아닌 역 인근 기준의 가상 지점입니다.</p>
-            <div className="branch-map-modal-actions">
-              <button type="button" className="btn btn-secondary" onClick={() => setModalBranchId(null)}>닫기</button>
-              <button type="button" className="btn btn-primary" onClick={confirmBranch}>이 지점 선택</button>
-            </div>
-          </section>
-        </div>
-      )}
     </div>
   );
 };
