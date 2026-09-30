@@ -9,7 +9,7 @@ interface Props {
 interface GoogleMapApi {
   maps: {
     LatLng: new (latitude: number, longitude: number) => unknown;
-    Map: new (container: HTMLElement, options: { center: unknown; zoom: number }) => GoogleMapInstance;
+    Map: new (container: HTMLElement, options: { center: unknown; zoom: number; mapId: string }) => GoogleMapInstance;
     Marker: new (options: { map: GoogleMapInstance; position: unknown; title?: string }) => GoogleMarker;
     event: { addListener: (target: GoogleMarker, eventName: string, handler: () => void) => void };
   };
@@ -56,7 +56,7 @@ export const BranchMap: React.FC<Props> = ({ selectedBranchId, onSelect }) => {
       if (cancelled || !mapElement.current || !window.google) return;
       const { maps } = window.google;
       const center = new maps.LatLng(37.548, 127.026);
-      const map = new maps.Map(mapElement.current, { center, zoom: 11 });
+      const map = new maps.Map(mapElement.current, { center, zoom: 11, mapId: 'DEMO_MAP_ID' });
       mapRef.current = map;
       markersRef.current = BRANCHES.map((branch, index) => {
         const marker = new maps.Marker({
@@ -78,7 +78,7 @@ export const BranchMap: React.FC<Props> = ({ selectedBranchId, onSelect }) => {
       const script = document.createElement('script');
       script.id = GOOGLE_SCRIPT_ID;
       script.async = true;
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}&loading=async&callback=${GOOGLE_CALLBACK}`;
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}&libraries=maps&loading=async&callback=${GOOGLE_CALLBACK}`;
       script.addEventListener('error', () => setMapError('지도를 불러오지 못했습니다. 아래 지점 목록으로 선택할 수 있습니다.'), { once: true });
       document.head.appendChild(script);
     }
