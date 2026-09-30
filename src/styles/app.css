@@ -733,6 +733,28 @@ body {
   margin: 0 auto;
 }
 
+.customer-route {
+  max-height: 100vh;
+  overflow-x: auto;
+  overflow-y: auto;
+  scrollbar-color: #46617c #07182a;
+  scrollbar-width: thin;
+}
+
+.customer-route::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+.customer-route::-webkit-scrollbar-track {
+  background: #07182a;
+}
+
+.customer-route::-webkit-scrollbar-thumb {
+  border-radius: 7px;
+  background: #46617c;
+}
+
 .customer-app-shell {
   max-width: 1180px;
   padding-top: 16px;
