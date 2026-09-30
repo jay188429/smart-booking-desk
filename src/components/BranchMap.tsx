@@ -7,13 +7,14 @@ interface Props {
 }
 
 const buildMapUrl = (apiKey: string) => {
-  const markers = BRANCHES.map(branch => (
-    `lonlat:${branch.longitude},${branch.latitude};type:material;color:%236de0d0;size:42;text:${encodeURIComponent(branch.name.replace('지점', ''))}`
-  )).join('|');
   const params = new URLSearchParams({
     style: 'osm-bright', width: '900', height: '320', center: 'lonlat:127.026,37.548', zoom: '11',
-    format: 'png', marker: markers, apiKey,
+    format: 'png', apiKey,
   });
+  BRANCHES.forEach(branch => params.append(
+    'marker',
+    `lonlat:${branch.longitude},${branch.latitude};type:material;color:#6de0d0;size:42;text:${branch.name.replace('지점', '')}`,
+  ));
   return `https://maps.geoapify.com/v1/staticmap?${params.toString()}`;
 };
 
