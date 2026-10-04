@@ -64,7 +64,7 @@ export const GoogleLoginPage: React.FC<GoogleLoginPageProps> = ({ onLoginSuccess
         <div className="login-panel-bar">◆ <span>Powered by Smart Booking Desk</span></div>
         <div className="login-columns">
           <section className="login-intro">
-            <div className="login-avatar" aria-hidden="true">d</div>
+            <div className="login-avatar" aria-hidden="true">J</div>
             <span className="eyebrow">Smart Booking Desk</span>
             <h1>예약하기</h1>
             <p>원하는 시간을 선택해 주세요.</p>
