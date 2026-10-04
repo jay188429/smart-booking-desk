@@ -95,7 +95,7 @@ export async function readSnapshot(client: SupabaseClient, userId: string, admin
 export type WriteAction = 'submit_request' | 'resubmit_request' | 'submit_request_at_branch' | 'resubmit_request_at_branch' | 'confirm_request' | 'cancel_request';
 // 응답 유실 시에도 같은 입력의 재시도에 같은 ID를 사용하며 데모 데이터는 건드리지 않습니다.
 export async function writeReservation(client: SupabaseClient, userId: string, action: WriteAction, payload: Record<string, unknown>, storage: Pick<Storage, 'getItem' | 'setItem' | 'removeItem'> = sessionStorage) {
-  const scope = `cal_dudu_rpc:${userId}:${action}:${JSON.stringify(payload)}`;
+  const scope = `smart_booking_rpc:${userId}:${action}:${JSON.stringify(payload)}`;
   let operationId = storage.getItem(scope);
   if (!operationId) { operationId = crypto.randomUUID(); storage.setItem(scope, operationId); }
   const { data, error } = await client.rpc(action, { ...payload, p_operation_id: operationId });

@@ -52,7 +52,7 @@ export class DatabaseManager {
   private loadFromLocalStorage() {
     try {
       if (typeof window !== 'undefined' && window.localStorage) {
-        const stored = window.localStorage.getItem('cal_dudu_db');
+        const stored = window.localStorage.getItem('smart_booking_db');
         if (stored) {
           const data = JSON.parse(stored);
           this.db = data;
@@ -67,7 +67,7 @@ export class DatabaseManager {
   private saveToLocalStorage() {
     try {
       if (typeof window !== 'undefined' && window.localStorage) {
-        window.localStorage.setItem('cal_dudu_db', JSON.stringify(this.db));
+        window.localStorage.setItem('smart_booking_db', JSON.stringify(this.db));
       }
     } catch (e) {
       // Node.js 환경 또는 localStorage 오류 무시

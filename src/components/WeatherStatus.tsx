@@ -21,10 +21,19 @@ function describeWeather(code: number, isDay: boolean) {
 }
 
 function getWeatherMessage(code: number, temperature: number, isDay: boolean) {
-  if ([95, 96, 99].includes(code)) return '천둥번개가 있어요. 외출할 때 안전에 유의하세요.';
-  if ([71, 73, 75, 77, 85, 86].includes(code)) return '눈이 와요. 따뜻하게 입고 미끄럼을 조심하세요.';
+  const messageCycle = [
+    '점점 날씨가 추워지고 있어요. 따뜻하게 입고 다녀요.',
+    '따뜻한 차 한 잔은 어때요? 외출 전 몸을 따뜻하게 챙겨요.',
+    '목도리는 하셨나요? 찬 바람에 감기 조심하세요.',
+    '장갑은 챙기셨나요? 손을 따뜻하게 보호해 주세요.',
+  ];
+  const rotatingMessage = messageCycle[Math.floor(Date.now() / 86_400_000) % messageCycle.length];
+
+  if ([95, 96, 99].includes(code)) return '천둥번개가 있어요. 따뜻하게 입고 외출할 때 안전에 유의하세요.';
+  if ([71, 73, 75, 77, 85, 86].includes(code)) return '눈이 와요! 따뜻하게 입고 미끄럼을 조심하세요.';
   if ([51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82].includes(code)) return '비가 올 수 있어요. 우산 챙기셨죠?';
-  if (temperature < 8) return '날씨가 쌀쌀해요. 잘 챙겨 입으셨죠?';
+  if (temperature < 5) return rotatingMessage;
+  if (temperature < 12) return '날씨가 쌀쌀해요. 따뜻하게 입고 다녀요.';
   if (temperature >= 28) return '더운 날씨예요. 물 자주 마시고 시원하게 보내세요.';
   if (code === 0 && isDay && temperature >= 15 && temperature <= 25) return '날씨가 좋은데 커피 한잔과 산책 어떠세요?';
   if ([1, 2].includes(code) && temperature >= 12 && temperature <= 25) return '선선한 날씨예요. 가볍게 산책해도 좋겠어요.';

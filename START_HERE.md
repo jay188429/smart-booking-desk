@@ -1,4 +1,4 @@
-# cal.dudu 시작하기
+# Smart Booking Desk 시작하기
 
 Node.js 22 LTS와 npm을 권장합니다. 예약 기간은 한국 시간 2026-09-09~12-31이며, 오전 9·10·11, 오후 13·14·15·16·17, 저녁 19·20을 선택합니다. 새 시간대 Supabase DB에는 `sql/06_expand_time_slots.sql`을 추가 실행합니다. 세 지점은 동일 시간표를 공유하며 신청에 지점만 매핑하려면 `sql/07_add_branches.sql`도 실행합니다. 지도 좌표까지 Supabase에 저장하려면 이어서 `sql/08_branch_map_coords.sql`을 실행합니다.
 

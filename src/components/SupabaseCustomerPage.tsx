@@ -67,6 +67,7 @@ export const SupabaseCustomerPage: React.FC<Props> = ({ client, user }) => {
     timeZone: 'Asia/Seoul',
     hour: '2-digit',
     minute: '2-digit',
+    second: '2-digit',
     hour12: false,
   }).format(now);
 
@@ -154,7 +155,7 @@ export const SupabaseCustomerPage: React.FC<Props> = ({ client, user }) => {
           <span className="eyebrow">Smart Booking Desk</span>
           <p>원하는 시간을 선택해 주세요.</p>
           <div className="booking-detail"><span aria-hidden="true">◷</span><span>1시간 이용</span></div>
-          <div className="booking-detail"><span aria-hidden="true">◷</span><span>현재 시각 {currentSeoulTime} (KST)</span></div>
+          <div className="booking-detail"><span aria-hidden="true">◷</span><span>현재 시각 {currentSeoulTime}</span></div>
           <p className="booking-account">로그인 계정<br /><strong>{user.email ?? user.id}</strong></p>
         </aside>
 

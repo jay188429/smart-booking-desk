@@ -1196,9 +1196,27 @@ body {
 
 .calendar-selection-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 220px;
+  grid-template-columns: minmax(360px, 1fr) 220px;
   gap: 14px;
   align-items: start;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  scrollbar-color: #46617c #0b1c2e;
+  scrollbar-width: thin;
+}
+
+.calendar-selection-layout::-webkit-scrollbar {
+  height: 7px;
+}
+
+.calendar-selection-layout::-webkit-scrollbar-track {
+  border-radius: 7px;
+  background: #0b1c2e;
+}
+
+.calendar-selection-layout::-webkit-scrollbar-thumb {
+  border-radius: 7px;
+  background: #46617c;
 }
 
 @media (max-width: 760px) {
@@ -1231,7 +1249,10 @@ body {
   position: relative;
   display: grid;
   place-items: center;
+  width: 100%;
+  height: 58px;
   min-height: 58px;
+  padding: 0;
   border: 1px solid transparent;
   border-radius: 6px;
   background: transparent;
@@ -1301,12 +1322,12 @@ body {
 }
 
 .calendar-day.available:hover {
-  border-color: #2bd477;
+  box-shadow: inset 0 0 0 1px #2bd477;
   background: rgba(43, 212, 119, 0.12);
 }
 
 .calendar-day.selected {
-  border-color: #2bd477;
+  box-shadow: inset 0 0 0 1px #2bd477;
   background: #2bd477;
   color: #062b1a;
   font-weight: 800;
@@ -1943,11 +1964,14 @@ body {
 
 @media (max-width: 560px) {
   .customer-route {
-    min-width: 600px;
+    width: 100%;
+    min-width: 0;
+    overflow-x: hidden;
   }
 
   .customer-route .booking-shell {
-    min-width: 560px;
+    width: 100%;
+    min-width: 0;
   }
 
   .customer-app-shell {
@@ -2028,6 +2052,39 @@ body {
     padding: 24px 18px 30px;
   }
 
+  .customer-app-shell .booking-main {
+    padding: 22px 14px 28px;
+  }
+
+  .customer-app-shell .booking-shell::before {
+    padding: 0 10px;
+    font-size: 10px;
+    white-space: nowrap;
+  }
+
+  .branch-picker {
+    padding: 12px;
+  }
+
+  .branch-picker-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .branch-map-list {
+    grid-template-columns: 1fr;
+  }
+
+  .branch-map-image {
+    height: auto;
+    aspect-ratio: 900 / 320;
+  }
+
+  .calendar-selection-layout {
+    width: 100%;
+  }
+
   .booking-status-card {
     padding: 20px;
   }
@@ -2072,35 +2129,13 @@ body {
     overflow-x: visible;
   }
 
-  .calendar-months {
-    width: 100%;
-    min-width: 0;
-    overflow-x: auto;
-    padding-bottom: 5px;
-    scrollbar-color: #46617c #0b1c2e;
-    scrollbar-width: thin;
-  }
-
-  .calendar-months::-webkit-scrollbar {
-    height: 5px;
-  }
-
-  .calendar-months::-webkit-scrollbar-track {
-    background: #0b1c2e;
-  }
-
-  .calendar-months::-webkit-scrollbar-thumb {
-    border-radius: 5px;
-    background: #46617c;
-  }
-
   .calendar-month {
     width: 100%;
-    min-width: 460px;
+    min-width: 0;
   }
 
   .calendar-grid {
-    grid-template-columns: repeat(7, minmax(42px, 1fr));
+    grid-template-columns: repeat(7, minmax(0, 1fr));
     gap: 2px;
     padding: 10px 6px;
   }
@@ -2126,7 +2161,7 @@ body {
   }
 
   .calendar-slot-marks {
-    width: min(26px, 70%);
+    width: min(24px, 70%);
   }
 
   .selection-summary {

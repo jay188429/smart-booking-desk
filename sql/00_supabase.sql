@@ -1,4 +1,4 @@
--- cal.dudu-works.com v1.0 설치 스크립트 (통합: 스키마 + RPC + 슬롯 데이터)
+-- Smart Booking Desk v1.0 설치 스크립트 (통합: 스키마 + RPC + 슬롯 데이터)
 -- Supabase PostgreSQL 용
 -- 한국 시간 2026-09-09~2026-09-22 14일, 매일 오전·오후·저녁 42슬롯
 
